@@ -1,0 +1,64 @@
+
+一、JNI---（Java native interface）
+
+	(1) class 中，声明函数，native static void foo{};
+	(2) compile
+		javac xxx.java
+		javah -jni xx
+	(3) 实现调用的函数
+		生成的头文件.h中的函数实现
+	(4) 生成动态库
+		gcc -fPIC xx.c -o xx.o  -fPIC 代表生成位置无关代码
+		如果没有jni.h则指定路径
+			gcc -I /usr/local/bin/jdk1.7.0_07/include/
+				-I /usr/local/bin/jdk1.7.0_07/include/linux/
+					-c -fPIC xx.c -o xx.o
+			
+					gcc -shared xx.o -o libxx.so
+	(5) 在java文件中指定动态库
+					static {
+						System.loadLibrary("xx(不加后缀)");  //在不同的OS中编译器会做不同的处理，Linux系统加上.so，windows中加上.dll后缀。
+					}
+	(6) 重新编译
+	javac xxx.java
+	(7) 执行 LD_LIBRARY_PATH=. java xx
+
+二、JNI接口的参数
+
+   JNIEXPORT void JNICALL Java_HelloWorld_print_1who(JNIEnv *env, jclass obj);
+    (1) JNIEXPORT ：起到一个标志性的作用。
+　　(2) void ：返回值。比如jint等。
+　　(3) JNICALL ：一个标志，标志后面的方法。
+　　(4) Java_HelloWorld_print_1who：包名+类名+方法名。
+　　(5) JNIEnv * env：这个env是Jni接口本身的一个对象，jni.h头文件中存在着大量被封装好的函数，要想调用这些函数就需要使用JNIEnv这个对象。例如：env->GetObjectClass()。
+　　(6) jclass obj：参数jclass的意义，要看方法是不是静态的（static）或者实例（Instance）的。前者，jclass代表一个类对象的引用，而后者是被调用的方法所属对象的引用。可以调用java程序提供的类的一些方法
+
+三、android的层次结构
+
+	Android Package	 ----- *.apk
+	framework		 -----*.jar
+	JNI				 -----本地调用接口
+	NDK				 -----*.so 
+	本地可执行文件   ------系统命令等
+
+四、模拟器的运行以及编译应用程序环境的搭建
+
+	export PATH=$PATH:<android_home>/out/host/linux-x86/bin
+	export ANDROID_PRODUCT_OUT=<android_home>/out/target/product/generic
+
+五、android应用程序HelloWorld的实现步骤
+
+
+六、android本地库的实现
+
+	与JNI动态库的实现相同
+
+七、编译以及运行
+
+
+
+
+
+
+
+

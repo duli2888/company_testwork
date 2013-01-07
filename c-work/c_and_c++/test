@@ -1,0 +1,11 @@
+
+
+class test {
+	private:
+		int a ; int b ;
+
+	public:
+		int test_add(){
+			printf("[test] a + b = ?\n");
+		}
+};
