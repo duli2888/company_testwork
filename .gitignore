@@ -1,0 +1,14 @@
+# ignore vim temp files
+*~
+.*.swp
+.*.swo
+
+# ignore vim session files
+*.vim
+
+# ignore svn metadata
+.svn/*
+*/.svn/*
+
+# project specific ignores
+minicom.cap
