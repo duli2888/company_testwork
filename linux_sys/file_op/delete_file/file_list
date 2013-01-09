@@ -1,7 +1,5 @@
 a.txt
-aa
 b.txt
-bb
 c.txt
 cc
 d.txt
@@ -11,6 +9,7 @@ ee
 f.txt
 ff
 g.txt
+gg/a.txt
 gg
 aa/aaa
 aa/bbb
@@ -22,3 +21,5 @@ bb/bbb
 bb/ccc
 bb/a.txt
 bb/aaa/a.txt
+aa
+bb
