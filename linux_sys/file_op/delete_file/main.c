@@ -7,21 +7,18 @@
 
 #include <errno.h>
 
-#define MAX_FILE_LENTH 4096
 #define MAX_NAME 20
 
 int main()
 {
 	FILE *fp;
 	int ret;
-	char buffer[MAX_FILE_LENTH];
 	char tmp_name[MAX_NAME];
-	int i = 0, letter_count = 0, pre_position = 0;
+	int i = 0,  pre_position = 0;
 	int flag = 0;
 
 	struct stat file_state;
 
-	memset(buffer, '\0', MAX_FILE_LENTH);
 	memset(tmp_name, '\0', MAX_NAME);
 	
 	if ((fp = fopen("file_list", "r")) == NULL) {
@@ -29,17 +26,14 @@ int main()
 		return 0;
 	}
 
-	fread(buffer, 1, MAX_FILE_LENTH, fp);
-	int total_len = strlen(buffer);
-	pre_position = 0;
 
 	for (flag = 0; flag < 2; flag ++) {
-		do {
-			while(buffer[i] != '\n') {
-				i++;
+		while(1) {
+			ret = fscanf(fp, "%s",tmp_name);
+			if (ret == EOF){
+				break;
 			}
-			letter_count = i - pre_position;
-			strncpy(tmp_name, &buffer[pre_position], letter_count);
+
 			if (lstat(tmp_name, &file_state) < 0) 
 			{ 
 				if (flag == 1) {
@@ -68,13 +62,10 @@ int main()
 			}
 end:
 			memset(tmp_name, '\0', MAX_NAME);
-			i++;
-			letter_count++;
-			pre_position = i;
-		}while(i < total_len);
-		pre_position = 0;
-		i = 0; letter_count = 0; pre_position = 0;
+		}
+		fseek(fp, 0, SEEK_SET);
 	}
+
 	fclose(fp);
 	return 0;
 }
