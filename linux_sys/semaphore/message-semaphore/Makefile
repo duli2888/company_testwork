@@ -1,0 +1,3 @@
+CFLAGS += -lrt -pthread
+
+sema:

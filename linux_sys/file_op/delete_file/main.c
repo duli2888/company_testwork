@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <string.h>
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -17,14 +16,13 @@ int main()
 
 	struct stat file_state;
 
-	memset(tmp_name, '\0', MAX_NAME);
-
 	if ((fp = fopen("file_list", "r")) == NULL) {
 		printf("Opening the file_list file is fail\n");
 		return 0;
 	}
 
 	while(1) {
+		memset(tmp_name, '\0', MAX_NAME);
 		ret = fscanf(fp, "%s",tmp_name);
 		if (ret == EOF){
 			break;
@@ -43,7 +41,6 @@ int main()
 			else 
 				printf("Delete %s Ok\n",tmp_name);
 		}
-		memset(tmp_name, '\0', MAX_NAME);
 	}
 
 	fseek(fp, 0, SEEK_SET);
@@ -61,13 +58,13 @@ int main()
 		}
 
 		if (S_ISDIR(file_state.st_mode)){
-			if (remove(tmp_name))
+			if (rmdir(tmp_name))
 				printf("Delete %s directory\n", tmp_name);
 			else 
 				printf("Delete %s Ok\n",tmp_name);
 		}
 	}
 
-		fclose(fp);
-		return 0;
+	fclose(fp);
+	return 0;
 }
