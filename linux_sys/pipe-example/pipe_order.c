@@ -7,7 +7,16 @@
 int p_fd[2];
 static int thread_cnt = 0;
 static pthread_t saved_threads[HVG_EU_MAX_THREADS];
-char *g_ch;
+char g_ch;
+
+void *manage_thread(pthread_t tid) {
+	int i;
+	for (i = 0 ; i < 24; i++) {
+		g_ch = 'a' + i;
+	}
+
+
+}
 
 int register_thread(pthread_t tid) { 
 	if (thread_cnt < EU_MAX_THREADS) {

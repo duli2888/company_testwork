@@ -24,7 +24,7 @@ void *getMessage(void *arg) {
 	for (i = 0; i < 10; ++i) {
 		sem_wait(&msg_empty);
 
-		pthread_mutex_lock(&msg_queue_mutex);
+		// pthread_mutex_lock(&msg_queue_mutex);
 
 		if (msg_cnt >= 6)
 			msg[0] = '\0';
@@ -34,7 +34,8 @@ void *getMessage(void *arg) {
 		}
 
 		sem_post(&msg_ready);
-		pthread_mutex_unlock(&msg_queue_mutex);
+		// pthread_mutex_unlock(&msg_queue_mutex);
+		sleep(1);
 	}
 
 	return NULL;
@@ -44,12 +45,12 @@ void *showMessage(void *arg) {
 	while (1) {
 		sem_wait(&msg_ready);
 
-		pthread_mutex_lock(&msg_queue_mutex);
+		// pthread_mutex_lock(&msg_queue_mutex);
 
 		printf("[SHOW]------[%s]\n", msg);
 		sem_post(&msg_empty);
 
-		pthread_mutex_unlock(&msg_queue_mutex);
+		// pthread_mutex_unlock(&msg_queue_mutex);
 
 		if (msg[0] == '\0')
 			return NULL;
@@ -86,3 +87,12 @@ int main() {
 
 	return 0;
 }
+
+
+
+/*
+ * 注释：(1) pthread_mutex_lock() 和pthread_mutex_unlock() 函数是保护多个线程访问的变量的控制，
+ *			 只能保证上锁的区域在同一个时间，只能保证被同一个线程访问，不能保证多个县城交替执行，
+ *			 所以有可能某个线程可以连续多次访问某个变量。
+ *		 (2) sem_wait() 和 sem_post() 在两个线程中交叉使用，可以保证两个函数交替执行的问题。
+ */
