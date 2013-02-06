@@ -12,3 +12,7 @@
 
 # project specific ignores
 minicom.cap
+
+# deleted file
+c-work/a.out
+c-work/main_test.c
