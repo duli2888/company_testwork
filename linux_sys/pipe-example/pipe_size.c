@@ -39,7 +39,6 @@ int main()
 	}
 
 //	push_data(NULL);
-//	show_data(NULL);
 	show_data(NULL);
 	pthread_create(&tid1, NULL, push_data, NULL);
 	printf("fist thread created\n");

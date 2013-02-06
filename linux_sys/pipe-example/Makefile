@@ -1,8 +1,19 @@
 CFLAGS += -pthread
 
-all:test1 test2
+SRCS = $(wildcard *.c)
 
-test1:
+OBJS = $(SRCS:.c = .o)
 
+CC = gcc
 
-test2:
+INCLUDES = -I./
+
+CCFLAGS = -g -Wall -O0
+
+all : $(OBJS)
+	$(CC) $^ -o $@ $(INCLUDES)
+% : %.c
+	$(CC) -c $< $(CCFLAGS)
+
+clean:
+	　　rm *.o
