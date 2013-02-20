@@ -37,26 +37,10 @@ int main(int argc, char** argv)
 		exit(0);
 	}
 
-<<<<<<< HEAD
-	printf("send msg to server: \n");
-	fgets(sendline, 4096, stdin);
-
-	if( send(sockfd, sendline, strlen(sendline), 0) < 0)
-	{
-		printf("send msg error: %s(errno: %d)\n", strerror(errno), errno);
-		exit(0);
-	}
-
-	close(sockfd);
-	exit(0);
-}
-
-=======
 	while(1){
 		printf("send msg to server: \n");
 		fgets(sendline, 4096, stdin);
-		if( send(sockfd, sendline, strlen(sendline), 0) < 0)
-		{
+		if( send(sockfd, sendline, strlen(sendline), 0) < 0) {
 			printf("send msg error: %s(errno: %d)\n", strerror(errno), errno);
 			exit(0);
 		}
@@ -64,4 +48,3 @@ int main(int argc, char** argv)
 	close(sockfd);
 	exit(0);
 }
->>>>>>> 27301f26d265e3eb72051d5804675049dc493272
