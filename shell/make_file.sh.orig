@@ -1,0 +1,147 @@
+#!/bin/sh
+
+FILE_DIR=orig_directory   # 等号两边不能有空格
+PACK_DIR=pack_directory
+FILE_SIZE=4M
+
+LOOP_CNT=100
+
+echo "创建视频网关多种测试文件包！！！"
+
+version_number=`date +"%Y.%m.%d"`
+
+# 创建.bin的文件	
+function file_bin() {
+	sh write_file.sh $LOOP_CNT | dd of=app.${version_number}.bin
+	sh write_file.sh $LOOP_CNT | dd of=kernel.${version_number}.bin
+	sh write_file.sh $LOOP_CNT | dd of=loader.${version_number}.bin
+	sh write_file.sh $LOOP_CNT | dd of=rootfs.${version_number}.bin
+}
+
+# 创建.bin.gz文件
+function file_bin_gz() {
+	gzip -c app.${version_number}.bin > app.2013.02.26.bin.gz
+	gzip -c kernel.${version_number}.bin > kernel.2013.02.26.bin.gz
+	gzip -c loader.${version_number}.bin > loader.2013.02.26.bin.gz
+	gzip -c rootfs.${version_number}.bin > rootfs.2013.02.26.bin.gz
+}
+
+# 创建目录和文件
+function file_dir_file() {
+	mkdir -p app
+	mkdir -p kernel
+	mkdir -p loader
+	mkdir -p rootfs
+
+	sh write_file.sh $LOOP_CNT | dd of=app/file1
+	sh write_file.sh $LOOP_CNT | dd of=app/file2
+	sh write_file.sh $LOOP_CNT | dd of=app/file3
+	sh write_file.sh $LOOP_CNT | dd of=app/file4
+
+	cp -rf app kernel
+	cp -rf app loader
+	cp -rf app rootfs
+}
+
+# 创建.tar的文件
+function file_tar() {
+	tar cvf app.${version_number}.tar app
+	tar cvf kernel.${version_number}.tar kernel
+	tar cvf loader.${version_number}.tar loader
+	tar cvf rootfs.${version_number}.tar rootfs
+}
+
+# 创建.tar.gz的文件
+function file_tar_gz() {
+	tar czvf app.${version_number}.tar.gz app
+	tar czvf kernel.${version_number}.tar.gz kernel
+	tar czvf loader.${version_number}.tar.gz loader
+	tar czvf rootfs.${version_number}.tar.gz rootfs
+}
+
+if [ "$1" = "c" ]; then
+	echo "Clean All Package"
+	rm pack.000f.8a.01.tar.gz
+	exit 0
+fi
+
+
+mkdir -p ${FILE_DIR}
+cp write_file.sh ${FILE_DIR}
+cd ${FILE_DIR}
+##################################	创建第一级文件[单包]	###################################
+
+# 创建.bin的文件	
+file_bin
+
+# 创建.bin.gz文件
+file_bin_gz
+
+# 创建目录和文件
+file_dir_file
+
+# 创建.tar的文件
+file_tar
+
+# 创建.tar.gz的文件
+file_tar_gz
+
+##################################	创建第二级文件[多包]	###################################
+
+
+cd ..
+mkdir -p ${PACK_DIR}
+
+sub_num=${version_number:8:2}                                                                                                                                              
+
+function new_pack_name() {
+	pack_number=${version_number:0:8}
+	((sub_num--))           # 如果今天的日期是很小的数字，则有会减为零或者负数
+	pack_number=${pack_number}${sub_num}
+	pack_name=pack.${pack_number}.tar.gz
+}
+
+#	包中有多个.bin的文件"
+new_pack_name
+tar czvf ${PACK_DIR}/${pack_name} ${FILE_DIR}/*.bin
+
+#	包中有多个.bin.gz文件
+new_pack_name
+tar czvf ${PACK_DIR}/${pack_name} ${FILE_DIR}/*.bin.gz
+
+#	包中有多个.tar文件
+new_pack_name
+tar czvf ${PACK_DIR}/${pack_name} ${FILE_DIR}/*.tar
+
+#	包中有多个.tar.gz文件
+new_pack_name
+tar czvf ${PACK_DIR}/${pack_name} ${FILE_DIR}/*.tar.gz
+
+#	包中有单个.bin，单个.bin.gz，单个.tar，单个.tar.gz文件
+new_pack_name
+tar czvf ${PACK_DIR}/${pack_name} ${FILE_DIR}/app*bin ${FILE_DIR}/kernel*.bin.gz ${FILE_DIR}/rootfs.*.tar ${FILE_DIR}/loader.*.tar.gz
+
+
+#	单个.bin，单个.bin.gz，单个.tar
+new_pack_name
+tar czvf ${PACK_DIR}/${pack_name} ${FILE_DIR}/app*bin ${FILE_DIR}/kernel*.bin.gz ${FILE_DIR}/rootfs.*.tar
+
+#	单个.bin，单个.bin.gz，单个.tar.gz
+new_pack_name
+tar czvf ${PACK_DIR}/${pack_name} ${FILE_DIR}/app*bin ${FILE_DIR}/kernel*.bin.gz ${FILE_DIR}/loader.*.tar.gz
+
+#	单个.bin，单个.tar，单个.tar.gz
+new_pack_name
+tar czvf ${PACK_DIR}/${pack_name} ${FILE_DIR}/app*bin ${FILE_DIR}/rootfs.*.tar ${FILE_DIR}/loader.*.tar.gz
+
+#	单个.bin.gz，单个.tar，单个.tar.gz
+new_pack_name
+tar czvf ${PACK_DIR}/${pack_name} ${FILE_DIR}/kernel*.bin.gz ${FILE_DIR}/rootfs.*.tar ${FILE_DIR}/loader.*.tar.gz
+
+#	单个.tar.gz
+new_pack_name
+tar czvf ${PACK_DIR}/${pack_name} ${FILE_DIR}/app.*.tar.gz
+
+#	单个.bin.gz
+new_pack_name
+tar czvf ${PACK_DIR}/${pack_name} ${FILE_DIR}/app.*.bin.gz
