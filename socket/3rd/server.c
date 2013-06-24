@@ -6,7 +6,7 @@
 #include<sys/socket.h>
 #include<netinet/in.h>
 
-#define MAXLINE 4096
+#define MAXLINE 100
 
 int main(int argc, char** argv)
 {
@@ -14,11 +14,13 @@ int main(int argc, char** argv)
 	struct sockaddr_in     servaddr;
 	char    buff[4096];
 	int     n;
+	int reuse = 1;
 
 	if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) == -1){
 		printf("create socket error: %s(errno: %d)\n",strerror(errno), errno);
 		exit(0);
 	}
+	setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
 
 	memset(&servaddr, 0, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
@@ -36,16 +38,18 @@ int main(int argc, char** argv)
 	}
 
 	printf("======waiting for client's request======\n");
-	while(1){
-		if((connfd = accept(listenfd, (struct sockaddr*)NULL, NULL)) == -1){
-			printf("accept socket error: %s(errno: %d)",strerror(errno), errno);
-			continue;
-		}
-		n = recv(connfd, buff, MAXLINE, 0);
+	if((connfd = accept(listenfd, (struct sockaddr*)NULL, NULL)) == -1){
+		printf("accept socket error: %s(errno: %d)",strerror(errno), errno);
+		return -1;
+	}
+	while (n = recv(connfd, buff, MAXLINE, 0)) {
+		if (n < 0) {
+			printf("recv error\n");
+			break;
+		} 
+		printf("RECV Data number = %d\n", n);
 		buff[n] = '\0';
 		printf("recv msg from client: %s\n", buff);
-		close(connfd);
 	}
-
 	close(listenfd);
 }

@@ -10,18 +10,14 @@
 
 int main(int argc, char** argv)
 {
-	int    sockfd, n;
+	int    sockfd;
 	char    recvline[4096], sendline[4096];
 	struct sockaddr_in    servaddr;
-
-	if( argc != 2){
-		printf("usage: ./client <ipaddress>\n");
-		exit(0);
-	}
+	int sn;
 
 	if( (sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0){
 		printf("create socket error: %s(errno: %d)\n", strerror(errno),errno);
-		exit(0);
+		return -1;
 	}
 
 	memset(&servaddr, 0, sizeof(servaddr));
@@ -29,22 +25,23 @@ int main(int argc, char** argv)
 	servaddr.sin_port = htons(3000);
 	if( inet_pton(AF_INET, argv[1], &servaddr.sin_addr) <= 0){
 		printf("inet_pton error for %s\n",argv[1]);
-		exit(0);
+		return -1;
 	}
-
 	if( connect(sockfd, (struct sockaddr*)&servaddr, sizeof(servaddr)) < 0){
 		printf("connect error: %s(errno: %d)\n",strerror(errno),errno);
-		exit(0);
+		return -1;
 	}
 
-	while(1){
+	strcpy(sendline, "I am a client,Hello,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,Hello, I am a client,");
 		printf("send msg to server: \n");
-		fgets(sendline, 4096, stdin);
-		if( send(sockfd, sendline, strlen(sendline), 0) < 0) {
+		//fgets(sendline, 4096, stdin);
+		sn = send(sockfd, sendline, strlen(sendline), 0);
+		printf("SEND Date number = %d\n", sn);
+		if(sn < 0) {
 			printf("send msg error: %s(errno: %d)\n", strerror(errno), errno);
-			exit(0);
+			return -1;
 		}
-	}
+		sleep(3);
 	close(sockfd);
-	exit(0);
+	return 0;
 }
