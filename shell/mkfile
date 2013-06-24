@@ -1,0 +1,111 @@
+#!/bin/env perl
+
+use Modern::Perl;
+use utf8;
+
+use Getopt::Long;
+
+my $sInFileName		= '/dev/zero';
+my $sOutFileName	= 'out';
+my $iSize			= 4096;
+my $sSizeStr		= '4096';
+my $bHelp			= 0;
+
+GetOptions(
+	'h'		=> \$bHelp,
+	'i=s'	=> \$sInFileName,
+	'o=s'	=> \$sOutFileName,
+	's=s'	=> \$sSizeStr,
+);
+
+my $sUsage = <<END;
+mkfile [-i <数据源文件>] [-o <目标文件>] [-s <文件大小>]
+END
+
+binmode STDOUT, ':utf8';
+
+if ($bHelp  or  scalar @ARGV > 0) {
+	print $sUsage;
+	exit 0;
+}
+
+# 处理文件大小参数
+given ($sSizeStr) {
+	when (m/^(\d+)$/) {
+		$iSize = $1;
+	}
+	when (m/^(\d+)[kK]$/) {
+		$iSize = $1 * 1024;
+	}
+	when (m/^(\d+)[mM]$/) {
+		$iSize = $1 * 1024 * 1024;
+	}
+	when (m/^(\d+)[gG]$/) {
+		$iSize = $1 * 1024 * 1024 * 1024;
+	}
+	default {
+		die "无法识别的文件长度：$sSizeStr\n";
+	}
+}
+
+unlink $sOutFileName;
+open(my $fout, '>', $sOutFileName)  or  die "无法写文件：$sOutFileName\n";
+
+if ($iSize == 0) {
+	close $fout;
+	exit 0;
+}
+
+my ($sBuf, $iBufLen);
+
+given ($sInFileName) {
+	when (-f) {
+	# 输入源是普通文件
+		open(my $fin, '<', $sInFileName)  or  die "无法读文件：$sInFileName\n";
+		{
+			undef $/;
+			$sBuf = <$fin>;
+		}
+		close $fin;
+
+		$iBufLen = length $sBuf;
+		#say 'source length ', $iBufLen;
+		die "数据源文件无内容\n" unless $iBufLen > 0;
+
+		for (my $i = int($iSize / $iBufLen); $i > 0; --$i) {
+			print $fout $sBuf;
+		}
+
+		my $iLeft = $iSize % $iBufLen;
+		#say "$iLeft bytes left";
+		#say substr($sBuf, 0, $iLeft);
+		if ($iLeft > 0) {
+			print $fout substr($sBuf, 0, $iLeft);
+		}
+	}
+	when (-c) {
+	# 输入源是字符文件
+		open(my $fin, '<', $sInFileName)  or  die "无法读文件：$sInFileName\n";
+
+		$iBufLen = 4096;
+		for (my $i = int($iSize / $iBufLen); $i > 0; --$i) {
+			$sBuf = '';
+			read $fin, $sBuf, $iBufLen;
+			print $fout $sBuf;
+		}
+
+		my $iLeft = $iSize % $iBufLen;
+		if ($iLeft > 0) {
+			$sBuf = '';
+			read $fin, $sBuf, $iLeft;
+			print $fout substr($sBuf, 0, $iLeft);
+		}
+
+		close $fin;
+	}
+	default {
+		die "不支持的数据源文件：$sInFileName\n";
+	}
+}
+
+close $fout;

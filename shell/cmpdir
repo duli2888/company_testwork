@@ -1,0 +1,32 @@
+#!/bin/env perl
+
+use Modern::Perl;
+use utf8;
+
+use File::DirCompare;
+use File::Basename;
+
+my $sUsage = <<END;
+用法： cmpdir <目录甲> <目录乙>
+END
+
+binmode STDOUT, ':utf8';
+
+if (scalar @ARGV != 2) {
+	print $sUsage;
+	exit 0;
+}
+
+File::DirCompare->compare($ARGV[0], $ARGV[1], \&myCompare);
+
+sub myCompare {
+	my ($a, $b) = @_;
+
+	if (! $b) {
+		printf "Only in %s: %s\n", dirname($a), basename($a);
+	} elsif (! $a) {
+		printf "Only in %s: %s\n", dirname($b), basename($b);
+	} else {
+		say "Files $a and $b differ";
+	}
+}
