@@ -90,11 +90,10 @@ L4_CV void __shared_ip_addr(unsigned int ip_addr) L4_NOTHROW
 	L4::Ipc_iostream s(l4_utcb());
 	s << l4_umword_t(Ankh::Opcode::SharedIp);
 	l4_msgtag_t res = s.call(ankh_server.cap(), Ankh::Protocol::Ankh);
-	if (res.has_error())
+	if (res.has_error()) {
+		printf("SharedIp Error\n");
 		return ;
-
-	printf("SharedIp success.\n");
-
+	}
 }
 
 L4_CV AnkhSessionDescriptor *l4ankh_get_info() L4_NOTHROW

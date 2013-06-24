@@ -85,10 +85,13 @@ typedef struct  __attribute__((packed)){
 
 enum udp_ports {
 	udp_port_reserved = 0,
+	udp_port_unkown=1,
 	udp_port_echo = 7,
 	udp_port_dns_srv = 53,
-	udp_port_bootp_srv = 67,
+	//udp_port_dns_srv = 4096, // added by DuLi
+	udp_port_bootp_srv = 69,
 	udp_port_bootp_clnt = 68,
+	udp_port_tftp_clnt = 4097,	//??
 };
 
 typedef struct __attribute__((packed))
@@ -111,6 +114,7 @@ typedef struct
 	l4_uint16_t sequence;
 		
 } icmp_hdr;
+
 
 
 /*
@@ -193,7 +197,7 @@ enum dns_ops
  */
 __BEGIN_DECLS
 
-void packet_analyze(char *p, unsigned len);
+l4_uint16_t packet_analyze(char *p, unsigned len);
 
 
 /*
@@ -212,7 +216,7 @@ struct arp_entry {
 mac_addr * find_arp_table(ip_addr *ip, mac_addr *mac);
 
 /* delete older records, maybe more one */
-int delete_arp_old();
+int delete_arp_old(void);
 
 /* add a record to table
  * 相同IP，多个MAC地址;单个MAC地址，多个IP地址则不考虑，属于正常

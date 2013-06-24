@@ -173,13 +173,13 @@ EXTERN_C void *xmit_thread_fn(void *data)
 		int err = chunk->next_copy_out(tx_buf, &size);
 		//l4_cache_dma_coherent_full();
 		assert(err == 0);
-		
+#if 1		
 		if (session->debug()) {
-	//		packet_analyze(tx_buf, size);
+//			packet_analyze(tx_buf, size);
 		}
+#endif
 
-		packet_analyze(tx_buf, size);
-//		std::cout << "xmit " << (void*)tx_buf << " " << size << "\n";
+	//	std::cout << "xmit " << (void*)tx_buf << " " << size << "\n";
 		// try to deliver locally
 		unsigned local = packet_deliver(tx_buf, size, session->dev()->name(), static_cast<unsigned>(true));
 
@@ -195,9 +195,9 @@ EXTERN_C void *xmit_thread_fn(void *data)
 		if (local || err == 0) {
 			sd->num_tx++;
 			sd->tx_bytes += size;
-		}
-		else
+		} else {
 			sd->tx_dropped++;
+		}
 	}
 	return NULL;
 }

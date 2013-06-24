@@ -1,0 +1,44 @@
+
+--此行及以下内容将会被忽略--
+
+M    include/protocol
+M    include/packet_analyzer.h
+M    include/client-c.h
+M    include/session.h
+M    include/Makefile
+M    lib/lwip/lib/arch/sys_arch.c
+M    lib/lwip/lib/arch/ankh_if.c
+M    lib/lwip/lib/contrib/doc/rawapi.txt
+M    lib/lwip/lib/contrib/src/include/ipv4/lwip/ip_addr.h
+M    lib/lwip/lib/contrib/src/include/lwip/opt.h
+M    lib/lwip/lib/contrib/src/netif/ethernetif.c
+M    lib/lwip/lib/contrib/src/netif/etharp.c
+M    lib/lwip/lib/contrib/src/core/ipv4/ip.c
+M    lib/lwip/lib/contrib/src/core/ipv6/ip6.c
+M    lib/lwip/lib/contrib/src/core/tcp_in.c
+M    lib/lwip/lib/contrib/src/api/sockets.c
+M    lib/lwip/lib/contrib/src/api/netdb.c
+M    lib/lwip/lib/contrib/src/api/tcpip.c
+M    lib/lwip/lib/lwipopts.h
+M    lib/client-c/lib.cc
+M    lib/analyzer/etypes.h
+M    lib/analyzer/analyze.c
+M    server/netlib/linux_glue.h
+M    server/netlib/hisfv300/ctrl.c
+M    server/netlib/hisfv300/glb.c
+M    server/netlib/hisfv300/hieth.h
+M    server/netlib/hisfv300/glb.h
+M    server/netlib/hisfv300/net-drv.c
+M    server/netlib/suka_mem.cc
+M    server/netlib/hisf.c
+M    server/netlib/linux_glue.c
+M    server/Makefile
+M    server/src/Makefile
+M    server/src/session
+M    server/src/session.cc
+M    server/src/main.cc
+M    Makefile
+M    readme.sunray
+M    examples/lwip/main.c
+M    examples/lwip/Makefile
+M    examples/ping/ping.cc

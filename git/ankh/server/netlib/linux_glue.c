@@ -1,4 +1,6 @@
-
+#include <stdio.h>
+#include <string.h>
+#include <malloc.h>
 struct net_device
 {
 	char	name[16];
@@ -10,16 +12,16 @@ struct net_device
     int     (*net_send)(struct net_device *dev, char *addr, unsigned len);
 };
 
+
 unsigned int linux_glue_ip_addr;
 
-
+#include "linux_glue.h"
 
 #include "hisf.c"
 
 static struct net_device *devs[1] =
    { &hisf };
 
-#include "linux_glue.h"
 
 #define DEBUG(DBG, msg, ...) \
 	do { if (DBG) \
@@ -151,8 +153,10 @@ subsys_initcall(_init_linux_glue);
 
 int netdev_irq(void *netdev)
 {
+ (void)netdev;
   //printf("netdev_irq() called\n");
- return 0/*ND(netdev)->irq*/; }
+ return 0;/*ND(netdev)->irq*/
+}
 
 
 char const *netdev_name(void *netdev)
@@ -160,11 +164,13 @@ char const *netdev_name(void *netdev)
 {
   //printf("netdev_name() called\n");
 
- return &ND(netdev)->name; }
+ return (char const *)&ND(netdev)->name;
+}
 
 
 int netdev_set_promisc(void *netdev)
 {
+	(void)netdev;
 	int err;
 #if 1
     printf("warning: netdev_set_promisc() not handled!\n");
@@ -181,7 +187,8 @@ int netdev_set_promisc(void *netdev)
 
 int netdev_unset_promisc(void *netdev)
 {
-	int err;
+	(void)netdev;
+	int err = 0;
     printf("warning: netdev_unset_promisc() not handled!\n");
 #if 0
 	struct net_device *dev = ND(netdev);
@@ -196,30 +203,31 @@ int netdev_unset_promisc(void *netdev)
 void *alloc_dmaable_buffer(unsigned size)
 {
   //printf("alloc_dmaable_buffer(size = %d) called\n",size);
-
 	return malloc(size); ///kmalloc(size, GFP_KERNEL);
 }
 
 
 int netdev_get_promisc(void *netdev)
 {
+	(void)netdev;
   //printf("netdev_get_promisc() called\n");
+  //netdev = NULL;
 
- return 0/*ND(netdev)->flags & IFF_PROMISC*/; }
+ return 0;/*ND(netdev)->flags & IFF_PROMISC*/
+}
 
 
 char *netdev_dev_addr(void *netdev)
 {
   //printf("netdev_dev_addr() called\n");
- return ND(netdev)->dev_addr; }
-
+ return ND(netdev)->dev_addr;
+}
 
 int netdev_mtu(void *netdev)
 {
   //printf("netdev_mtu() called\n");
-
- return ND(netdev)->mtu; }
-
+ return ND(netdev)->mtu;
+}
 
 int netdev_xmit(void *netdev, char *addr, unsigned len)
 {

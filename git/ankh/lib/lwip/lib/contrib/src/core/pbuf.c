@@ -198,7 +198,7 @@ pbuf_alloc(pbuf_layer layer, u16_t length, pbuf_type type)
     /* FALLTHROUGH */
   case PBUF_IP:
     /* add room for IP layer header */
-    offset += PBUF_IP_HLEN;
+    offset += PBUF_IP_HLEN;  // defined PBUF_IP_HLEN = 20, is IP header size
     /* FALLTHROUGH */
   case PBUF_LINK:
     /* add room for link layer header */

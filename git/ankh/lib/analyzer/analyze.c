@@ -48,11 +48,11 @@ static l4_uint16_t parse_eth(eth_hdr *e)
 	switch(type) {
 		case ETHERTYPE_ARP:
 			if (!PA_ARP)
-				return 0;  // return function from here
+				return ETHERTYPE_ARP;  // return function from here
 			break;
 		case ETHERTYPE_IP:
 			if (!PA_IP)
-				return 0;
+				return ETHERTYPE_IP;
 			break;
 		default:
 			return 0;
@@ -90,23 +90,24 @@ static void parse_arp(arp_hdr *a)
 	print_ip(ip1, &a->snd_prot_addr);
 	print_ip(ip2, &a->target_prot_addr);
 
-	printf("  [ARP]");
-	switch(ntohs(a->op))
-	{
-		case arp_op_request:
-			printf(" REQ from %s (%s) for %s\n", mac1, ip1, ip2);
-			break;
-		case arp_op_reply:
-			printf(" REPLY from %s (%s), target = %s (%s)\n",
-			       mac1, ip1, mac2, ip2);
-			break;
-		case arp_op_rarp_request:
-			printf(" RARP REQ from %s (%s) for %s\n", mac1, ip1, ip2);
-			break;
-		case arp_op_rarp_reply:
-			printf(" RARP REPLY from %s (%s), target = %s (%s)\n",
-			       mac1, ip1, mac2, ip2);
-			break;
+	if (PA_ARP) {
+		switch(ntohs(a->op))
+		{
+			case arp_op_request:
+				printf(" REQ from %s (%s) for %s\n", mac1, ip1, ip2);
+				break;
+			case arp_op_reply:
+				printf(" REPLY from %s (%s), target = %s (%s)\n",
+						mac1, ip1, mac2, ip2);
+				break;
+			case arp_op_rarp_request:
+				printf(" RARP REQ from %s (%s) for %s\n", mac1, ip1, ip2);
+				break;
+			case arp_op_rarp_reply:
+				printf(" RARP REPLY from %s (%s), target = %s (%s)\n",
+						mac1, ip1, mac2, ip2);
+				break;
+		}
 	}
 }
 
@@ -198,26 +199,34 @@ static void parse_dns_srv(dns_t *d)
 }
 
 
-static void parse_udp(udp_hdr *u)
+static l4_uint16_t parse_udp(udp_hdr *u)
 {
 	l4_uint16_t psrc = ntohs(u->src_port);
 	l4_uint16_t pdst =  ntohs(u->dst_port);
+#if 0
 	printf("    [UDP] src %d(%s), dest %d(%s), len %x, cs %x\n",
 		   psrc, udp_port_str(psrc), pdst, udp_port_str(pdst),
 	       ntohs(u->length), ntohs(u->checksum));
+#endif
 
 	switch(pdst) {
 		case udp_port_bootp_srv:
 			if (PA_DHCP || PA_BOOTP)
 				parse_dhcp_srv((dhcp*)((char*)u + sizeof(udp_hdr)));
+			return udp_port_bootp_srv;
 			break;
 		case udp_port_bootp_clnt:
 			if (PA_DHCP || PA_BOOTP)
 				parse_dhcp_clnt((dhcp*)((char*)u + sizeof(udp_hdr)));
+			return udp_port_bootp_clnt;
 			break;
 		case udp_port_dns_srv:
 			if (PA_DNS)
 				parse_dns_srv((dns_t *)((char*)u + sizeof(udp_hdr)));
+			return udp_port_dns_srv;
+			break;
+		default:
+			return udp_port_unkown;
 	}
 }
 
@@ -251,7 +260,7 @@ static char const * ip_proto_str(l4_uint8_t prot)
 	return "??";
 }
 
-static void parse_ip(ip_hdr *ip)
+static l4_uint16_t parse_ip(ip_hdr *ip)
 {
 	char ip1[ipbuf_size];
 	char ip2[ipbuf_size];
@@ -261,6 +270,7 @@ static void parse_ip(ip_hdr *ip)
 
 	unsigned char hlen = (ip->ver_hlen & 0x0F) * sizeof(int);
 
+#if 0
 	printf("  [IP] version %d, hlen %d, services %d, plen %d, id %d\n",
 	       (ip->ver_hlen & 0xF0) >> 4,
 	       (ip->ver_hlen & 0x0F),
@@ -273,17 +283,21 @@ static void parse_ip(ip_hdr *ip)
 	       ip->ttl, ip_proto_str(ip->proto), ip->proto);
 	printf("       csum %x, src %s, dest %s\n",
 	       ntohs(ip->checksum), ip1, ip2);
+#endif
 
 	switch(ip->proto)
 	{
 		case ip_proto_icmp:
 			if (PA_ICMP) parse_icmp((icmp_hdr*)((char*)ip + hlen));
+			return ip_proto_icmp;
 			break;
 		case ip_proto_tcp:
-			if (PA_TCP)  parse_tcp((tcp_hdr*)((char*)ip + hlen));
+			if (PA_TCP) parse_tcp((tcp_hdr*)((char*)ip + hlen));
+			return ip_proto_tcp;
 			break;
 		case ip_proto_udp:
-			if (PA_UDP) parse_udp((udp_hdr*)((char*)ip + hlen));
+			if (PA_UDP)  ;
+			return parse_udp((udp_hdr*)((char*)ip + hlen));
 			break;
 		default:
 			break;
@@ -291,7 +305,7 @@ static void parse_ip(ip_hdr *ip)
 }
 
 
-void packet_analyze(char *p, unsigned len)
+l4_uint16_t packet_analyze(char *p, unsigned len)
 {
 	ASSERT_NOT_NULL(p);
 	ASSERT_GREATER_EQ(len, sizeof(eth_hdr));
@@ -299,17 +313,19 @@ void packet_analyze(char *p, unsigned len)
 	eth_hdr *eth = (eth_hdr*)p;
 
 	l4_uint16_t type = parse_eth(eth);
+	l4_uint16_t	re_val = 0;
 	if (!type){
-		return;
+		return re_val;
 	}
 
 	switch(type)
 	{
 		case ETHERTYPE_ARP:
 			parse_arp((arp_hdr*)(p + sizeof(eth_hdr)));
+			return ETHERTYPE_ARP;
 			break;
 		case ETHERTYPE_IP:
-			parse_ip((ip_hdr*)(p + sizeof(eth_hdr)));
+			return parse_ip((ip_hdr*)(p + sizeof(eth_hdr)));
 			break;
 	}
 }

@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/ht/!svn/ver/7660/SLoader/30.Code/l4/pkg/ankh/lib/lwip/lib/contrib/src/core/ipv6
+END
+README
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svn/ht/!svn/ver/7660/SLoader/30.Code/l4/pkg/ankh/lib/lwip/lib/contrib/src/core/ipv6/README
+END
+icmp6.c
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/ht/!svn/ver/7660/SLoader/30.Code/l4/pkg/ankh/lib/lwip/lib/contrib/src/core/ipv6/icmp6.c
+END
+ip6.c
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/ht/!svn/ver/7719/SLoader/30.Code/l4/pkg/ankh/lib/lwip/lib/contrib/src/core/ipv6/ip6.c
+END
+inet6.c
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/ht/!svn/ver/7660/SLoader/30.Code/l4/pkg/ankh/lib/lwip/lib/contrib/src/core/ipv6/inet6.c
+END
+ip6_addr.c
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/ht/!svn/ver/7660/SLoader/30.Code/l4/pkg/ankh/lib/lwip/lib/contrib/src/core/ipv6/ip6_addr.c
+END

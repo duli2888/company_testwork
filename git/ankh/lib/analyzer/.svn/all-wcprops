@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/ht/!svn/ver/7569/SLoader/30.Code/l4/pkg/ankh/lib/analyzer
+END
+etypes.h
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/ht/!svn/ver/7719/SLoader/30.Code/l4/pkg/ankh/lib/analyzer/etypes.h
+END
+analyze.c
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/ht/!svn/ver/7719/SLoader/30.Code/l4/pkg/ankh/lib/analyzer/analyze.c
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/ht/!svn/ver/7569/SLoader/30.Code/l4/pkg/ankh/lib/analyzer/Makefile
+END

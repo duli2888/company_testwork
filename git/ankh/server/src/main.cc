@@ -140,7 +140,7 @@ EXTERN_C void enable_ux_self()
 	l4_thread_control_commit(pthread_getl4cap(pthread_self()));
 }
 
-
+// 此函数是将网卡接收到的数据发给client端
 EXTERN_C int packet_deliver(void *packet, unsigned len, char const * const dev, unsigned local)
 {
 #if 0
@@ -153,6 +153,7 @@ EXTERN_C int packet_deliver(void *packet, unsigned len, char const * const dev, 
 	assert(packet != 0);
 	unsigned cnt = 0;
 	int c = l4_debugger_global_id(pthread_getl4cap(pthread_self()));
+	(void)c;
 
 #if 0
 	Ankh::Util::print_mac(static_cast<unsigned char*>(packet));
@@ -160,7 +161,7 @@ EXTERN_C int packet_deliver(void *packet, unsigned len, char const * const dev, 
 	Ankh::Util::print_mac(static_cast<unsigned char*>(packet)+6);
 	std::cout << std::endl;
 #endif
-//	printf("[packet_deliver]--[2012-09-26]--[1]\n");
+	// [DuLi]: 创建一个新的Session_factory,并通过目的MAC地址,或者设备名来返回第一个Session;
 	Ankh::ServerSession *s = Ankh::Session_factory::get()->find_session_for_mac(
 	                               static_cast<const char * const>(packet), dev);
 
@@ -182,18 +183,21 @@ EXTERN_C int packet_deliver(void *packet, unsigned len, char const * const dev, 
 		s = Ankh::Session_factory::get()->find_session_for_mac(
 		          static_cast<const char * const>(packet), dev, s);
 	}
+	// [DuLi]: 将网卡收到的包给每个Session将此包发一份，如果开启了广播，则所有的Session都会收到此包
 
 	return cnt;
 }
 
 int main(int argc, char **argv)
 {
+	(void)argc;
 	Ankh_server ankh;
 
 	char mac[6];
 
 	std::cout << argv[1] << "\n";
-	sscanf(argv[1],"mac=%x:%x:%x:%x:%x:%x",&mac[0],&mac[1],&mac[2],&mac[3],&mac[4],&mac[5]);
+	sscanf(argv[1],"mac=%x:%x:%x:%x:%x:%x",(unsigned int*)&mac[0],(unsigned int*)&mac[1],(unsigned int*)&mac[2],
+			(unsigned int*)&mac[3],(unsigned int*)&mac[4],(unsigned int*)&mac[5]);
 
 	int num_devs = open_network_devices(1,mac);
 	std::cout << "Opened " << num_devs << " network devices.\n";

@@ -100,8 +100,10 @@ lwip_gethostbyname(const char *name)
     h_errno = HOST_NOT_FOUND;
     return NULL;
   }
+  for(int i = 0; i < 10000; i++) ;
 
   /* fill hostent */
+  s_hostent_addr = addr;
   s_hostent_addr = addr;
   s_phostent_addr[0] = &s_hostent_addr;
   s_hostent.h_name = (char*)name;

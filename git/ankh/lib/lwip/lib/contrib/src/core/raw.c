@@ -206,38 +206,40 @@ raw_sendto(struct raw_pcb *pcb, struct pbuf *p, ip_addr_t *ipaddr)
   struct netif *netif;
   ip_addr_t *src_ip;
   struct pbuf *q; /* q will be sent down the stack */
+
   
   LWIP_DEBUGF(RAW_DEBUG | LWIP_DBG_TRACE, ("raw_sendto\n"));
   
   /* not enough space to add an IP header to first pbuf in given p chain? */
-  if (pbuf_header(p, IP_HLEN)) {
-    /* allocate header in new pbuf */
-    q = pbuf_alloc(PBUF_IP, 0, PBUF_RAM);
-    /* new header pbuf could not be allocated? */
-    if (q == NULL) {
-      LWIP_DEBUGF(RAW_DEBUG | LWIP_DBG_TRACE | LWIP_DBG_LEVEL_SERIOUS, ("raw_sendto: could not allocate header\n"));
-      return ERR_MEM;
-    }
-    /* chain header q in front of given pbuf p */
-    pbuf_chain(q, p);
-    /* { first pbuf q points to header pbuf } */
-    LWIP_DEBUGF(RAW_DEBUG, ("raw_sendto: added header pbuf %p before given pbuf %p\n", (void *)q, (void *)p));
+  if (pbuf_header(p, IP_HLEN)) {   // defined in ip.h, IP_HLEN = 20
+
+	  /* allocate header in new pbuf */
+	  q = pbuf_alloc(PBUF_IP, 0, PBUF_RAM);
+	  /* new header pbuf could not be allocated? */
+	  if (q == NULL) {
+		  LWIP_DEBUGF(RAW_DEBUG | LWIP_DBG_TRACE | LWIP_DBG_LEVEL_SERIOUS, ("raw_sendto: could not allocate header\n"));
+		  return ERR_MEM;
+	  }
+	  /* chain header q in front of given pbuf p */
+	  pbuf_chain(q, p);
+	  /* { first pbuf q points to header pbuf } */
+	  LWIP_DEBUGF(RAW_DEBUG, ("raw_sendto: added header pbuf %p before given pbuf %p\n", (void *)q, (void *)p));
   }  else {
-    /* first pbuf q equals given pbuf */
-    q = p;
-    if(pbuf_header(q, -IP_HLEN)) {
-      LWIP_ASSERT("Can't restore header we just removed!", 0);
-      return ERR_MEM;
-    }
+	  /* first pbuf q equals given pbuf */
+	  q = p;
+	  if(pbuf_header(q, -IP_HLEN)) {
+		  LWIP_ASSERT("Can't restore header we just removed!", 0);
+		  return ERR_MEM;
+	  }
   }
 
   if ((netif = ip_route(ipaddr)) == NULL) {
-    LWIP_DEBUGF(RAW_DEBUG | LWIP_DBG_LEVEL_WARNING, ("raw_sendto: No route to %"U16_F".%"U16_F".%"U16_F".%"U16_F"\n",
-      ip4_addr1_16(ipaddr), ip4_addr2_16(ipaddr), ip4_addr3_16(ipaddr), ip4_addr4_16(ipaddr)));
-    /* free any temporary header pbuf allocated by pbuf_header() */
-    if (q != p) {
-      pbuf_free(q);
-    }
+	  LWIP_DEBUGF(RAW_DEBUG | LWIP_DBG_LEVEL_WARNING, ("raw_sendto: No route to %"U16_F".%"U16_F".%"U16_F".%"U16_F"\n",
+				  ip4_addr1_16(ipaddr), ip4_addr2_16(ipaddr), ip4_addr3_16(ipaddr), ip4_addr4_16(ipaddr)));
+	  /* free any temporary header pbuf allocated by pbuf_header() */
+	  if (q != p) {
+		  pbuf_free(q);
+	  }
     return ERR_RTE;
   }
 
@@ -254,7 +256,7 @@ raw_sendto(struct raw_pcb *pcb, struct pbuf *p, ip_addr_t *ipaddr)
 #endif /* IP_SOF_BROADCAST */
 
   if (ip_addr_isany(&pcb->local_ip)) {
-    /* use outgoing network interface IP address as source address */
+    /* use outgoing network interface IP address as source address */ //会执行到
     src_ip = &(netif->ip_addr);
   } else {
     /* use RAW PCB local IP address as source address */
@@ -270,7 +272,7 @@ raw_sendto(struct raw_pcb *pcb, struct pbuf *p, ip_addr_t *ipaddr)
 #endif /* LWIP_NETIF_HWADDRHINT*/
 
   /* did we chain a header earlier? */
-  if (q != p) {
+  if (q != p) {  // 此项判断始终执行
     /* free the header */
     pbuf_free(q);
   }

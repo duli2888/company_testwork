@@ -1,10 +1,16 @@
 /home/duli/project_stv/suka/src/l4/pkg/ankh/server/src/../netlib/linux_glue.o \
 	: \
-	/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/linux_glue.h \
 	/home/duli/project_stv/suka/build/arm/l4re/include/l4/ankh/dldebug.h \
 	/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/../../lib/analyzer/etypes.h \
-	/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/../../examples/lwip/shared_ip_addr.h \
+	/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/../../include/shared_ip_addr.h \
+	/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/hisfv300/mdio.h \
+	/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/hisfv300/common/miiphy.h \
+	/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/hisfv300/hieth.h \
+	/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/hisf.c \
 	/home/duli/project_stv/suka/build/arm/l4re/include/l4/ankh/packet_analyzer.h \
+	/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/linux_glue.h \
+	/home/duli/project_stv/suka/build/arm/l4re/include/uclibc/malloc.h \
+	/home/duli/project_stv/suka/build/arm/l4re/include/uclibc/string.h \
 	/home/duli/project_stv/suka/build/arm/l4re/include/uclibc/bits/stdio_lim.h \
 	/opt/CodeSourcery/arm-2011.03/bin/../lib/gcc/arm-none-linux-gnueabi/4.5.2/include/stdarg.h \
 	/home/duli/project_stv/suka/build/arm/l4re/include/uclibc/bits/uClibc_pthread.h \
@@ -42,16 +48,18 @@
 	/home/duli/project_stv/suka/build/arm/l4re/include/uclibc/bits/uClibc_config.h \
 	/home/duli/project_stv/suka/build/arm/l4re/include/uclibc/features.h \
 	/home/duli/project_stv/suka/build/arm/l4re/include/uclibc/stdio.h \
-	/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/hisfv300/mdio.h \
-	/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/hisfv300/common/miiphy.h \
-	/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/hisfv300/hieth.h \
-	/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/hisf.c \
 	/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/linux_glue.c 
-/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/linux_glue.h:
 /home/duli/project_stv/suka/build/arm/l4re/include/l4/ankh/dldebug.h:
 /home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/../../lib/analyzer/etypes.h:
-/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/../../examples/lwip/shared_ip_addr.h:
+/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/../../include/shared_ip_addr.h:
+/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/hisfv300/mdio.h:
+/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/hisfv300/common/miiphy.h:
+/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/hisfv300/hieth.h:
+/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/hisf.c:
 /home/duli/project_stv/suka/build/arm/l4re/include/l4/ankh/packet_analyzer.h:
+/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/linux_glue.h:
+/home/duli/project_stv/suka/build/arm/l4re/include/uclibc/malloc.h:
+/home/duli/project_stv/suka/build/arm/l4re/include/uclibc/string.h:
 /home/duli/project_stv/suka/build/arm/l4re/include/uclibc/bits/stdio_lim.h:
 /opt/CodeSourcery/arm-2011.03/bin/../lib/gcc/arm-none-linux-gnueabi/4.5.2/include/stdarg.h:
 /home/duli/project_stv/suka/build/arm/l4re/include/uclibc/bits/uClibc_pthread.h:
@@ -89,8 +97,4 @@
 /home/duli/project_stv/suka/build/arm/l4re/include/uclibc/bits/uClibc_config.h:
 /home/duli/project_stv/suka/build/arm/l4re/include/uclibc/features.h:
 /home/duli/project_stv/suka/build/arm/l4re/include/uclibc/stdio.h:
-/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/hisfv300/mdio.h:
-/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/hisfv300/common/miiphy.h:
-/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/hisfv300/hieth.h:
-/home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/hisf.c:
 /home/duli/project_stv/suka/src/l4/pkg/ankh/server/netlib/linux_glue.c:

@@ -1,7 +1,9 @@
 PKGDIR	?= ..
 L4DIR	?= $(PKGDIR)/../..
 
-TARGET = src
+include $(L4DIR)/mk/Makeconf
+
+TARGET = src ankh_svr
 
 
 include $(L4DIR)/mk/subdir.mk

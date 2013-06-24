@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/ht/!svn/ver/7569/SLoader/30.Code/l4/pkg/ankh/server/netlib
+END
+linux_glue.h
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/ht/!svn/ver/7719/SLoader/30.Code/l4/pkg/ankh/server/netlib/linux_glue.h
+END
+suka_mem.cc
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/ht/!svn/ver/7719/SLoader/30.Code/l4/pkg/ankh/server/netlib/suka_mem.cc
+END
+suka_mem.h
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/ht/!svn/ver/7569/SLoader/30.Code/l4/pkg/ankh/server/netlib/suka_mem.h
+END
+hisf.c
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/ht/!svn/ver/7719/SLoader/30.Code/l4/pkg/ankh/server/netlib/hisf.c
+END
+linux_glue.c
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/ht/!svn/ver/7719/SLoader/30.Code/l4/pkg/ankh/server/netlib/linux_glue.c
+END

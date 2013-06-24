@@ -39,7 +39,7 @@
 #if LWIP_DNS /* don't build if not configured for use in lwipopts.h */
 
 /** DNS timer period */
-#define DNS_TMR_INTERVAL          1000
+#define DNS_TMR_INTERVAL         1000 
 
 /** DNS field TYPE used for "Resource Records" */
 #define DNS_RRTYPE_A              1     /* a host address */
@@ -101,7 +101,9 @@ typedef void (*dns_found_callback)(const char *name, ip_addr_t *ipaddr, void *ca
 
 void           dns_init(void);
 void           dns_tmr(void);
-void           dns_setserver(u8_t numdns, ip_addr_t *dnsserver);
+void		   dns_setserver(u8_t numdns, ip_addr_t *dnsserver);
+
+
 ip_addr_t      dns_getserver(u8_t numdns);
 err_t          dns_gethostbyname(const char *hostname, ip_addr_t *addr,
                                  dns_found_callback found, void *callback_arg);

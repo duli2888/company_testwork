@@ -186,6 +186,20 @@ low_level_output(struct netif *netif, struct pbuf *p)
     enter_kdebug();
   }
 #endif
+#if 0
+  printf("\n--------------------------[Send Packet length = %d]-------------------------------\n", p->tot_len);
+  int i;
+  unsigned char *tp = p->payload;
+  for (i = 1; i <= p->len; i++) {
+	  printf("%.2x ", *(char *)tp);
+	  tp++;
+	  if (i % 8 == 0) printf("  ");
+	  if (i % 16 == 0 ) printf("\n");
+
+  }
+  printf("\n--------------------------[p->next = %p]-------------------------------------------\n", p->next);
+#endif
+
 
   for(q = p; q != NULL; q = q->next) {
     /* Send the data from the pbuf to the interface, one pbuf at a

@@ -470,6 +470,7 @@ lwip_connect(int s, const struct sockaddr *name, socklen_t namelen)
 
   sock = get_socket(s);
   if (!sock) {
+	  printf("lwip_connect: get_socket() error\n");
     return -1;
   }
 
@@ -499,6 +500,7 @@ lwip_connect(int s, const struct sockaddr *name, socklen_t namelen)
   if (err != ERR_OK) {
     LWIP_DEBUGF(SOCKETS_DEBUG, ("lwip_connect(%d) failed, err=%d\n", s, err));
     sock_set_errno(sock, err_to_errno(err));
+	 printf("lwip_connect: netconn_connect() error\n");
     return -1;
   }
 
@@ -787,6 +789,21 @@ int
 lwip_sendto(int s, const void *data, size_t size, int flags,
        const struct sockaddr *to, socklen_t tolen)
 {
+#if 0
+				printf("\n--------------------------[lwip_sendto() Send Packet packetsize = %d]-------------------------------\n", 80);
+				printf("[lwip_sendto]sockfd = %d len = %d flags = %d addrlen = %d\n", s, size, flags, tolen);
+				printf("[lwip_sendto]sin_len = %d sin_family = %d, sin_addr = %d\n", to->sa_len, to->sa_family, to->sa_data[2]);
+				int i;
+				char *tp = data;
+				for (i = 1; i <= 80; i++) {
+					printf("%.2x ", *(char *)tp);
+					tp++;
+					if (i % 8 == 0) printf("  ");
+					if (i % 16 == 0 ) printf("\n");
+
+				}
+				printf("\n--------------------------[lwip_sendto]---------------------------------------------\n");
+#endif
   struct lwip_sock *sock;
   ip_addr_t remote_addr;
   err_t err;
@@ -843,12 +860,12 @@ lwip_sendto(int s, const void *data, size_t size, int flags,
       inet_addr_to_ipaddr(&remote_addr, &to_in->sin_addr);
       
       LOCK_TCPIP_CORE();
-      if (sock->conn->type == NETCONN_RAW) {
-        err = sock->conn->last_err = raw_sendto(sock->conn->pcb.raw, p, &remote_addr);
-      } else {
+	  if (sock->conn->type == NETCONN_RAW) {
+		  err = sock->conn->last_err = raw_sendto(sock->conn->pcb.raw, p, &remote_addr);
+	  } else {
 #if LWIP_CHECKSUM_ON_COPY && LWIP_NETIF_TX_SINGLE_PBUF
-        err = sock->conn->last_err = udp_sendto_chksum(sock->conn->pcb.udp, p,
-          &remote_addr, ntohs(to_in->sin_port), 1, chksum);
+		  err = sock->conn->last_err = udp_sendto_chksum(sock->conn->pcb.udp, p,
+				  &remote_addr, ntohs(to_in->sin_port), 1, chksum);
 #else /* LWIP_CHECKSUM_ON_COPY && LWIP_NETIF_TX_SINGLE_PBUF */
         err = sock->conn->last_err = udp_sendto(sock->conn->pcb.udp, p,
           &remote_addr, ntohs(to_in->sin_port));
@@ -862,7 +879,7 @@ lwip_sendto(int s, const void *data, size_t size, int flags,
     }
   }
 #else
-  /* initialize a buffer */
+  /* initialize a buffer */  // 会执行到
   buf.p = buf.ptr = NULL;
 #if LWIP_CHECKSUM_ON_COPY
   buf.flags = 0;
@@ -883,6 +900,19 @@ lwip_sendto(int s, const void *data, size_t size, int flags,
               s, data, short_size, flags));
   ip_addr_debug_print(SOCKETS_DEBUG, &remote_addr);
   LWIP_DEBUGF(SOCKETS_DEBUG, (" port=%"U16_F"\n", remote_port));
+#if 0
+  printf("\n--------------------------[Send Packet tot_len = %d len = %d]-------------------------------\n", buf.ptr->tot_len, buf.ptr->len);
+  int i;
+  unsigned char *tp = buf.ptr->payload;
+  for (i = 1; i <= buf.ptr->len; i++) {
+	  printf("%.2x ", *(char *)tp);
+	  tp++;
+	  if (i % 8 == 0) printf("  ");
+	  if (i % 16 == 0 ) printf("\n");
+
+  }
+  printf("\n--------------------------[p->next = %p]-------------------------------------------\n", buf.ptr->next);
+#endif
 
   /* make the buffer point to the data that should be sent */
 #if LWIP_NETIF_TX_SINGLE_PBUF
@@ -891,20 +921,20 @@ lwip_sendto(int s, const void *data, size_t size, int flags,
     err = ERR_MEM;
   } else {
 #if LWIP_CHECKSUM_ON_COPY
-    if (sock->conn->type != NETCONN_RAW) {
-      u16_t chksum = LWIP_CHKSUM_COPY(buf.p->payload, data, short_size);
-      netbuf_set_chksum(&buf, chksum);
-      err = ERR_OK;
-    } else
+	  if (sock->conn->type != NETCONN_RAW) {
+		  u16_t chksum = LWIP_CHKSUM_COPY(buf.p->payload, data, short_size);
+		  netbuf_set_chksum(&buf, chksum);
+		  err = ERR_OK;
+	  } else
 #endif /* LWIP_CHECKSUM_ON_COPY */
-    {
-    err = netbuf_take(&buf, data, short_size);
+	  {
+		  err = netbuf_take(&buf, data, short_size);
+	  }
   }
-  }
-#else /* LWIP_NETIF_TX_SINGLE_PBUF */
+#else /* LWIP_NETIF_TX_SINGLE_PBUF */  // 会执行到 , 为什么执行netbuf_ref之后,buf中没有数据，short_size = 0;
   err = netbuf_ref(&buf, data, short_size);
 #endif /* LWIP_NETIF_TX_SINGLE_PBUF */
-  if (err == ERR_OK) {
+  if (err == ERR_OK) {		// 会执行到
     /* send the data */
     err = netconn_send(sock->conn, &buf);
   }

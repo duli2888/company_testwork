@@ -89,6 +89,7 @@ const struct ip_hdr *current_header;
  * @param dest the destination IP address for which to find the route
  * @return the netif on which to send to reach dest
  */
+
 struct netif *
 ip_route(ip_addr_t *dest)
 {
@@ -98,15 +99,15 @@ ip_route(ip_addr_t *dest)
   for(netif = netif_list; netif != NULL; netif = netif->next) {
     /* network mask matches? */
     if (netif_is_up(netif)) {
-      if (ip_addr_netcmp(dest, &(netif->ip_addr), &(netif->netmask))) {
-        /* return netif on which to forward IP packet */
-        return netif;
-      }
-    }
+		if (ip_addr_netcmp(dest, &(netif->ip_addr), &(netif->netmask))) {
+			/* return netif on which to forward IP packet */
+			return netif;
+		}
+	}
   }
   if ((netif_default == NULL) || (!netif_is_up(netif_default))) {
-    LWIP_DEBUGF(IP_DEBUG | LWIP_DBG_LEVEL_SERIOUS, ("ip_route: No route to %"U16_F".%"U16_F".%"U16_F".%"U16_F"\n",
-      ip4_addr1_16(dest), ip4_addr2_16(dest), ip4_addr3_16(dest), ip4_addr4_16(dest)));
+	  LWIP_DEBUGF(IP_DEBUG | LWIP_DBG_LEVEL_SERIOUS, ("ip_route: No route to %"U16_F".%"U16_F".%"U16_F".%"U16_F"\n",
+				  ip4_addr1_16(dest), ip4_addr2_16(dest), ip4_addr3_16(dest), ip4_addr4_16(dest)));
     IP_STATS_INC(ip.rterr);
     snmp_inc_ipoutnoroutes();
     return NULL;
@@ -303,17 +304,33 @@ ip_input(struct pbuf *p, struct netif *inp)
           ip4_addr_get_u32(&netif->ip_addr) & ip4_addr_get_u32(&netif->netmask),
           ip4_addr_get_u32(&iphdr->dest) & ~ip4_addr_get_u32(&netif->netmask)));
 
-      /* interface is up and configured? */
-      if ((netif_is_up(netif)) && (!ip_addr_isany(&(netif->ip_addr)))) {
-        /* unicast to this interface address? */
-        if (ip_addr_cmp(&(iphdr->dest), &(netif->ip_addr)) ||
-            /* or broadcast on this interface network address? */
-            ip_addr_isbroadcast(&(iphdr->dest), netif)) {
-          LWIP_DEBUGF(IP_DEBUG, ("ip_input: packet accepted on interface %c%c\n",
-              netif->name[0], netif->name[1]));
-          /* break out of for loop */
-          break;
-        }
+	  /* interface is up and configured? */
+	  if ((netif_is_up(netif)) && (!ip_addr_isany(&(netif->ip_addr)))) {
+		  /* unicast to this interface address? */
+#if ENABLE_LOOPBACK
+		  if(netif->name[0] == 'l' && netif->name[1] == 'o') {
+			  if(ip_addr_netcmp(&(iphdr->dest), &(netif->ip_addr), &(netif->netmask)) ||		// Modified by DuLi [2013.3.25]支持127.xx.xx.xx地址127网段的任意地址
+				  //if (ip_addr_cmp(&(iphdr->dest), &(netif->ip_addr)) ||							// lwip 原来用的是这个作为判断的
+				  /* or broadcast on this interface network address? */
+				  ip_addr_isbroadcast(&(iphdr->dest), netif)) {
+					  LWIP_DEBUGF(IP_DEBUG, ("ip_input: packet accepted on interface %c%c\n",
+							  netif->name[0], netif->name[1]));
+					  /* break out of for loop */
+					  break;
+				 }
+		  } else {
+#endif
+			  if (ip_addr_cmp(&(iphdr->dest), &(netif->ip_addr)) ||							// lwip 原来用的是这个作为判断的
+			  /* or broadcast on this interface network address? */
+				  ip_addr_isbroadcast(&(iphdr->dest), netif)) {
+					  LWIP_DEBUGF(IP_DEBUG, ("ip_input: packet accepted on interface %c%c\n",
+					  netif->name[0], netif->name[1]));
+					  /* break out of for loop */
+					 break;
+#if ENABLE_LOOPBACK
+				}
+#endif
+		}
 #if LWIP_AUTOIP
         /* connections to link-local addresses must persist after changing
            the netif's address (RFC3927 ch. 1.9) */
@@ -567,6 +584,7 @@ err_t ip_output_if_opt(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest,
        u8_t ttl, u8_t tos, u8_t proto, struct netif *netif, void *ip_options,
        u16_t optlen)
 {
+
 #endif /* IP_OPTIONS_SEND */
   struct ip_hdr *iphdr;
   static u16_t ip_id = 0;
@@ -679,10 +697,19 @@ err_t ip_output_if_opt(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest,
   ip_debug_print(p);
 
 #if ENABLE_LOOPBACK
-  if (ip_addr_cmp(dest, &netif->ip_addr)) {
-    /* Packet to self, enqueue it for loopback */
-    LWIP_DEBUGF(IP_DEBUG, ("netif_loop_output()"));
-    return netif_loop_output(netif, p, dest);
+  //if (ip_addr_cmp(dest, &netif->ip_addr)) {											// lwip原来使用的判断语句
+  if(netif->name[0] == 'l' && netif->name[1] == 'o') {									// 针对lookback interface的处理
+	  if(ip_addr_netcmp(&(iphdr->dest), &(netif->ip_addr), &(netif->netmask))) { 		// Modified by DuLi [2013.3.25]支持127.xx.xx.xx地址127网段的任意地址
+		  /* Packet to self, enqueue it for loopback */
+		  LWIP_DEBUGF(IP_DEBUG, ("netif_loop_output()"));
+		  return netif_loop_output(netif, p, dest);
+	  }
+  } else {																				// 非lookback interface的网卡处理
+	  if (ip_addr_cmp(dest, &netif->ip_addr)) {
+
+		  LWIP_DEBUGF(IP_DEBUG, ("netif_loop_output()"));
+		  return netif_loop_output(netif, p, dest);
+	  }
   }
 #endif /* ENABLE_LOOPBACK */
 #if IP_FRAG
@@ -690,6 +717,20 @@ err_t ip_output_if_opt(struct pbuf *p, ip_addr_t *src, ip_addr_t *dest,
   if (netif->mtu && (p->tot_len > netif->mtu)) {
     return ip_frag(p,netif,dest);
   }
+#endif
+#if 0
+  printf("\n--------------------------[Send Packet tot_len = %d len = %d]-------------------------------\n", p->tot_len, p->len);
+  int i;
+  unsigned char *tp = p->payload;
+  for (i = 1; i <= p->len; i++) {
+	  printf("%.2x ", *(char *)tp);
+	  tp++;
+	  if (i % 8 == 0) printf("  ");
+	  if (i % 16 == 0 ) printf("\n");
+
+  }
+  printf("\n--------------------------[p->next = %p]-------------------------------------------\n", p->next);
+
 #endif
 
   LWIP_DEBUGF(IP_DEBUG, ("netif->output()"));

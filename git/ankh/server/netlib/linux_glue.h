@@ -1,6 +1,7 @@
 #pragma once
 
 #include <l4/sys/compiler.h>
+#include <l4/ankh/packet_analyzer.h>
 
 __BEGIN_DECLS
 
@@ -61,6 +62,14 @@ void enable_ux_self(void);
 /*
  * added by DuLi
  */
-
 void eth_shared_ip_addr(unsigned int );
+void do_ping_reply(void *packet);
+void do_arp_reply(void *packet);
+int hisf_send(struct net_device *dev,char *addr, unsigned len);
+int hisf_close(struct net_device *dev);
+void *ip_jump_next_layer(ip_hdr * ip_packet);
+int hisf_recv(void *packet, unsigned len);
+int hisf_open(struct net_device *dev);
+int eth_init(unsigned char *mac);
+int eth_send(volatile void *packet, int length);
 __END_DECLS

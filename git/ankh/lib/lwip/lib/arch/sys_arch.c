@@ -440,6 +440,7 @@ sys_arch_sem_wait(struct sys_sem **s, u32_t timeout)
   pthread_mutex_unlock(&(sem->mutex));
   return time_needed;
 }
+
 /*-----------------------------------------------------------------------------------*/
 void
 sys_sem_signal(struct sys_sem **s)

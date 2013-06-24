@@ -1,4 +1,6 @@
 #include <l4/sys/cache.h>
+#include <stdio.h>
+#include <string.h>
 
 #define HIETH_SFV300
 #include "hieth.h"
@@ -18,6 +20,18 @@ int hieth_mdiobus_driver_init(void);
 void hieth_mdiobus_driver_exit(void);
 extern unsigned int get_phy_device(char *devname, unsigned char phyaddr);
 static struct hieth_netdev_local hieth_devs[2];
+int eth_init_rx(void);
+int hisf_recv(void *packet, unsigned len);
+void eth_halt(void);
+int eth_init(unsigned char *mac);
+int eth_send(volatile void *packet, int length);
+int eth_rx(unsigned char *buf,unsigned int *length);
+void udelay(int);
+int suka_malloc(int size,unsigned int *virt,unsigned int *phys,unsigned int *handle);
+int suka_free(void *virt_addr);
+//int request_irq(unsigned int, irqreturn_t (*handler)(int, void *, struct pt_regs *), unsigned long, const char *, void *);
+
+
 
 // 2012-04-18 sunray, added start
 #ifndef	NULL
@@ -342,6 +356,7 @@ static int hieth_dev_probe_init(int port)
 
 static int hieth_dev_remove(struct hieth_netdev_local *ld)
 {
+	(void)ld;
     SFE_OFF;
     SFL;
 	return 0;
@@ -350,11 +365,11 @@ static int hieth_dev_remove(struct hieth_netdev_local *ld)
 static int hieth_init(void)
 {
 	int ret = 0;
-    char* phyaddr;
 
     SFE_OFF;
 #if 00 // 2012-04-18 sunray, deleted
     /*get phy addr of up port*/
+    char* phyaddr;
     phyaddr = getenv("phyaddru");
     if(phyaddr){
         unsigned long tmp = simple_strtoul(phyaddr, 0, 10);
@@ -466,12 +481,13 @@ static int alloc_txrx_buffer(void)
     //suka_malloc(2048, &rx_buf_virt, &rx_buf_phys,&rx_buf_handle);
     suka_malloc(2048 * 32, &rx_buf_virt, &rx_buf_phys,&rx_buf_handle); // [2012-10-24:DuLi]
     sunray_debug("allocate rx buffer, phys = 0x%x virt = 0x%x\n",rx_buf_phys,rx_buf_virt);
+	return 0;
 }
 
 static int free_txrx_buffer(void)
 {
-    suka_free(tx_buf_virt);
-    suka_free(rx_buf_virt);
+    suka_free((void *)tx_buf_virt);
+    suka_free((void *)rx_buf_virt);
     return 0;
 }
 
@@ -539,6 +555,7 @@ _link_ok:
 
 int eth_rx(unsigned char *buf,unsigned int *length) // 2012-04-18 sunray
 {
+	(void)buf;
     SFE_OFF;
 
 	int recvq_ready, timeout_us = 10000;
@@ -601,7 +618,9 @@ _error_exit:
    2012-04-17 sunray
    packet is phyical addr
 */
-
+#include <l4/ankh/packet_analyzer.h>
+#include "../../../lib/analyzer/etypes.h"
+#include <pthread-l4.h>
 
 int eth_send(volatile void *packet, int length)
 {
@@ -611,9 +630,44 @@ int eth_send(volatile void *packet, int length)
 
     SFE_OFF;
 
+#if 1
+	/* 此函数的调用是为了解决发送buf拷贝不正确的问题 */
+	int ret = sched_yield();
+	if(ret == -1){
+		printf("eth_send call ched_yield() failed\n");
+		return -1;
+	}
+#endif
+
+#if 0
+	printf("\n------------[Send Packet length = %d]----------------------\n", length);
+	int i;
+	unsigned char *tp = packet;
+	for (i = 1; i < length; i++) {
+		printf("%.2x ", *(char *)tp);
+		tp++;
+		if (i % 8 == 0) printf("  ");
+		if (i % 16 == 0 ) printf("\n");
+
+	}
+	printf("\n-----------------------------------------------\n");
+#endif
+
+#if 0
+	eth_hdr *eth = (eth_hdr*)packet;
+	l4_uint16_t packet_type = packet_analyze(packet, length);
+	if (packet_type == udp_port_dns_srv) {		// DNS包,53
+		l4_cache_dma_coherent_full();
+		memcpy((unsigned char*)tx_buf_virt, (unsigned char*)packet,length);
+	} else {
+		memcpy((unsigned char*)tx_buf_virt, (unsigned char*)packet,length);
+		l4_cache_dma_coherent_full();
+	}
+#else
     // 2012-04-17 sunray, copy data to our buf
-    memcpy((unsigned char*)tx_buf_virt,(unsigned char*)packet,length);
+    memcpy((void *)tx_buf_virt,(const void*)packet,length);
     l4_cache_dma_coherent_full();
+#endif
 
     //sunray_debug("eth_send(length=%d)\n",length);
 	/* check this we can add a Tx addr */
@@ -669,11 +723,11 @@ void eth_halt(void)
 
 static void irq_handler(int irq,void* data)
 {
-
+	(void)irq;
+	(void)data;
 	struct hieth_frame_desc fd;
 	struct hieth_netdev_local *ld = hieth_curr;
     int int_status;
-    static unsigned int count = 0;
 
 	hieth_irq_enable(ld, 0);
 	//hieth_irq_disable(ld, 0);
@@ -687,10 +741,11 @@ static void irq_handler(int irq,void* data)
 		hw_set_rxpkg_finish(ld);
 
 		// 2012-04-18 sunray
+		//static unsigned int count = 0;
 		// sunray_debug("irq_handler[%u]: %d bytes data received!\n",count,fd.frm_len);
 		// data_format_print(rx_buf_virt,fd.frm_len);
 		// printf("+++\n");
-		hisf_recv(rx_buf_virt,fd.frm_len);
+		hisf_recv((void *)rx_buf_virt,fd.frm_len);
 		hieth_clear_irqstatus(ld, UD_BIT_NAME(HIETH_INT_RX_RDY));
 		hieth_irq_enable(ld, 0xc0001);
 		/* fill rx hwq fd */

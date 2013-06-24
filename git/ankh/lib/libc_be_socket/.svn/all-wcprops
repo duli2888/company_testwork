@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/ht/!svn/ver/7660/SLoader/30.Code/l4/pkg/ankh/lib/libc_be_socket
+END
+be.c
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/ht/!svn/ver/7660/SLoader/30.Code/l4/pkg/ankh/lib/libc_be_socket/be.c
+END
+sock_fs.cc
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/ht/!svn/ver/7660/SLoader/30.Code/l4/pkg/ankh/lib/libc_be_socket/sock_fs.cc
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/ht/!svn/ver/7660/SLoader/30.Code/l4/pkg/ankh/lib/libc_be_socket/Makefile
+END
+sock_fs.h
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/ht/!svn/ver/7660/SLoader/30.Code/l4/pkg/ankh/lib/libc_be_socket/sock_fs.h
+END

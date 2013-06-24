@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/ht/!svn/ver/7569/SLoader/30.Code/l4/pkg/ankh/server/src
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/ht/!svn/ver/7719/SLoader/30.Code/l4/pkg/ankh/server/src/Makefile
+END
+device
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/ht/!svn/ver/7569/SLoader/30.Code/l4/pkg/ankh/server/src/device
+END
+device.cc
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/ht/!svn/ver/7569/SLoader/30.Code/l4/pkg/ankh/server/src/device.cc
+END
+session
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/ht/!svn/ver/7719/SLoader/30.Code/l4/pkg/ankh/server/src/session
+END
+session.cc
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/ht/!svn/ver/7719/SLoader/30.Code/l4/pkg/ankh/server/src/session.cc
+END
+main.cc
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/ht/!svn/ver/7719/SLoader/30.Code/l4/pkg/ankh/server/src/main.cc
+END

@@ -499,6 +499,18 @@ update_arp_entry(struct netif *netif, ip_addr_t *ipaddr, struct eth_addr *ethadd
     /* now queue entry can be freed */
     memp_free(MEMP_ARP_QUEUE, q);
     /* send the queued IP packet */
+#if 0 
+	printf("\n--------------------------[update_arp_entry : Send Packet total length = %d lenth = %d]-------------------------------\n", p->tot_len, p->len);
+	int i;
+	unsigned char *tp = p->payload;
+	for (i = 1; i <= p->len; i++) {
+		printf("%.2x ", *(char *)tp);
+		tp++;
+		if (i % 8 == 0) printf("  ");
+		if (i % 16 == 0 ) printf("\n");
+	}   
+	printf("\n--------------------------[p->next = %p]--------------------------------------------\n", p->next);
+#endif
     etharp_send_ip(netif, p, (struct eth_addr*)(netif->hwaddr), ethaddr);
     /* free the queued IP packet */
     pbuf_free(p);
@@ -832,7 +844,7 @@ etharp_arp_input(struct netif *netif, struct eth_addr *ethaddr, struct pbuf *p)
 err_t
 etharp_output(struct netif *netif, struct pbuf *q, ip_addr_t *ipaddr)
 {
-  struct eth_addr *dest, mcastaddr;
+	struct eth_addr *dest, mcastaddr;
 
   /* make room for Ethernet header - should not fail */
   if (pbuf_header(q, sizeof(struct eth_hdr)) != 0) {
@@ -884,19 +896,44 @@ etharp_output(struct netif *netif, struct pbuf *q, ip_addr_t *ipaddr)
       u8_t etharp_cached_entry = *(netif->addr_hint);
       if (etharp_cached_entry < ARP_TABLE_SIZE) {
 #endif /* LWIP_NETIF_HWADDRHINT */
+
         if ((arp_table[etharp_cached_entry].state == ETHARP_STATE_STABLE) &&
             (ip_addr_cmp(ipaddr, &arp_table[etharp_cached_entry].ipaddr))) {
           /* the per-pcb-cached entry is stable and the right one! */
           ETHARP_STATS_INC(etharp.cachehit);
-          return etharp_send_ip(netif, q, (struct eth_addr*)(netif->hwaddr),
-            &arp_table[etharp_cached_entry].ethaddr);
+#if 1
+		  struct pbuf *p;
+		  p = pbuf_alloc(PBUF_RAW, q->tot_len, PBUF_RAM);
+		  if(p != NULL) {
+			  if (pbuf_copy(p, q) != ERR_OK) {
+				  pbuf_free(p);
+				  p = NULL;
+			  }
+		  }
+#if 0
+	printf("\n--------------------------[etharp_send_ip : Send Packet total length = %d lenth = %d]-------------------------------\n", p->tot_len, p->len);
+	int i;
+	unsigned char *tp = p->payload;
+	for (i = 1; i <= p->len; i++) {
+		printf("%.2x ", *(char *)tp);
+		tp++;
+		if (i % 8 == 0) printf("  ");
+		if (i % 16 == 0 ) printf("\n");
+	}   
+	printf("\n--------------------------[q->next = %p]--------------------------------------------\n", p->next);
+#endif
+          return etharp_send_ip(netif, p, (struct eth_addr*)(netif->hwaddr),
+           &arp_table[etharp_cached_entry].ethaddr);
+#endif
+ //         return etharp_send_ip(netif, q, (struct eth_addr*)(netif->hwaddr),
+  //          &arp_table[etharp_cached_entry].ethaddr);
         }
 #if LWIP_NETIF_HWADDRHINT
       }
     }
 #endif /* LWIP_NETIF_HWADDRHINT */
     /* queue on destination Ethernet address belonging to ipaddr */
-    return etharp_query(netif, ipaddr, q);
+	return etharp_query(netif, ipaddr, q);
   }
 
   /* continuation for multicast/broadcast destinations */
@@ -1010,13 +1047,13 @@ etharp_query(struct netif *netif, ip_addr_t *ipaddr, struct pbuf *q)
       p = q;
       while (p) {
         LWIP_ASSERT("no packet queues allowed!", (p->len != p->tot_len) || (p->next == 0));
-        if(p->type != PBUF_ROM) {
+        if(p->type != PBUF_ROM) {   // 执行到,只要类型不是只读的，则需要重新拷贝到新的pbuf当中
           copy_needed = 1;
           break;
         }
         p = p->next;
       }
-      if(copy_needed) {
+      if(copy_needed) {// 执行到
         /* copy the whole packet into new pbufs */
         p = pbuf_alloc(PBUF_RAW, p->tot_len, PBUF_RAM);
         if(p != NULL) {
@@ -1030,6 +1067,18 @@ etharp_query(struct netif *netif, ip_addr_t *ipaddr, struct pbuf *q)
         p = q;
         pbuf_ref(p);
       }
+#if 0
+	printf("\n--------------------------[etharp_query : Send Packet total length = %d lenth = %d]-------------------------------\n", p->tot_len, p->len);
+	int i;
+	unsigned char *tp = p->payload;
+	for (i = 1; i <= p->len; i++) {
+		printf("%.2x ", *(char *)tp);
+		tp++;
+		if (i % 8 == 0) printf("  ");
+		if (i % 16 == 0 ) printf("\n");
+	}
+	printf("\n--------------------------[p->next = %p]--------------------------------------------\n", p->next);
+#endif
       /* packet could be taken over? */
       if (p != NULL) {
         /* queue packet ... */
@@ -1208,20 +1257,24 @@ ethernet_input(struct pbuf *p, struct netif *netif)
      (unsigned)htons(ethhdr->type)));
 
   type = ethhdr->type;
-
 #if 0
-  printf("[dest]%x %x %x %x %x %x\n",(unsigned)ethhdr->dest.addr[0], (unsigned)ethhdr->dest.addr[1], (unsigned)ethhdr->dest.addr[2],
-     (unsigned)ethhdr->dest.addr[3], (unsigned)ethhdr->dest.addr[4], (unsigned)ethhdr->dest.addr[5]);
-
-  printf("[src]%x %x %x %x %x %x\n",(unsigned)ethhdr->src.addr[0], (unsigned)ethhdr->src.addr[1], (unsigned)ethhdr->src.addr[2],
-     (unsigned)ethhdr->src.addr[3], (unsigned)ethhdr->src.addr[4], (unsigned)ethhdr->src.addr[5]);
+  printf("\n--------------------------[ethernet_input : Send Packet total length = %d lenth = %d]-------------------------------\n", p->tot_len, p->len);
+  int i;
+  unsigned char *tp = p->payload;
+  for (i = 1; i <= p->len; i++) {
+	  printf("%.2x ", *(char *)tp);
+	  tp++;
+	  if (i % 8 == 0) printf("  ");
+	  if (i % 16 == 0 ) printf("\n");
+  }
+  printf("\n----------------------------------------------------------------------------------------------------------------------\n");
 #endif
 
 #if ETHARP_SUPPORT_VLAN
   if (type == PP_HTONS(ETHTYPE_VLAN)) {
-    struct eth_vlan_hdr *vlan = (struct eth_vlan_hdr*)(((char*)ethhdr) + SIZEOF_ETH_HDR);
+	  struct eth_vlan_hdr *vlan = (struct eth_vlan_hdr*)(((char*)ethhdr) + SIZEOF_ETH_HDR);
 #ifdef ETHARP_VLAN_CHECK /* if not, allow all VLANs */
-    if (VLAN_ID(vlan) != ETHARP_VLAN_CHECK) {
+	  if (VLAN_ID(vlan) != ETHARP_VLAN_CHECK) {
       /* silently ignore this packet: not for our VLAN */
       pbuf_free(p);
       return ERR_OK;

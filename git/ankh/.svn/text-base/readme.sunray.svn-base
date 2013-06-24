@@ -1,0 +1,4 @@
+2012-05 sunray
+ankh 需要 shmc 共享内存库（libshmc_ringbuf.a）的支持。
+ankh 还需要 slab libboost-lite 模块的支持。
+ankh 中的调试功能需要包分析库（libpacket_analyzer.a）的支持。

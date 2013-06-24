@@ -1,7 +1,6 @@
 #include "hisfv300/hieth.h"
 #include <stdio.h>
-#include <l4/ankh/packet_analyzer.h>
-#include "../../examples/lwip/shared_ip_addr.h"
+#include "../../include/shared_ip_addr.h"
 #include "../../lib/analyzer/etypes.h" //added by DuLi,2012-12-3
 #include <l4/ankh/dldebug.h>
 #ifdef HISF_TEST
@@ -30,8 +29,6 @@ void data_format_print(unsigned char *buf,unsigned int length)
     }
     printf("===========================================================\n");
 }
-
-
 
 
 static int send_mac_packet_test(void)
@@ -177,6 +174,7 @@ static int arp_test(void)
 #endif
     return 0;
 }
+
 static int recv_mac_packet_test(void)
 {
     unsigned char buf[2048];
@@ -192,15 +190,14 @@ static int recv_mac_packet_test(void)
 // test code end
 #endif
 
-
 #if 1 // [DuLi] reason: struct net_device type
+
 // open hisf device
 int hisf_open(struct net_device *dev)
 {
-
     printf("\n-== Hisf eth driver build 2012-05-03,sunraylee@msn.com ==-\n");
 
-    eth_init(&dev->dev_addr[0]);
+    eth_init((unsigned char *)&dev->dev_addr[0]);
 
 #ifdef HISF_TEST
     send_mac_packet_test();
@@ -212,12 +209,13 @@ int hisf_open(struct net_device *dev)
 #endif
 int hisf_close(struct net_device *dev)
 {
+  (void)dev;
   return 0;
 }
 
-
 int hisf_send(struct net_device *dev,char *addr, unsigned len)
 {
+  (void)dev;
   return eth_send(addr,len);
 }
 
@@ -451,7 +449,7 @@ void do_ping_reply(void *packet)
 
 	if ((type_bit0 == 0x08) && (type_bit1 == 0x00)){
 		icmp_count++;
-		printf("[icmp_count] = %d\n",icmp_count);
+		printf("[icmp_count] = %lu\n",icmp_count);
 		eth_send(ping_reply, 98);
 	}
 	//	eth_send(ping_reply, 98);
@@ -499,14 +497,13 @@ int hisf_recv(void *packet, unsigned len)
     my_ip[0] = (linux_glue_ip_addr >> 0) & 0xFF;
 
 	eth_hdr *e = (eth_hdr *)packet;
-	ip_hdr *ip = (char *)e + ETHERTYPE_OFFSET;
-	udp_hdr *tmp_udp = (char *)e + ETHERTYPE_OFFSET;
+	ip_hdr *ip = (ip_hdr *)((char *)e + ETHERTYPE_OFFSET);
+	udp_hdr *tmp_udp = (udp_hdr *)((char *)e + ETHERTYPE_OFFSET);
 	unsigned char broadcast_ip[4] ;//= {0xFF, 0xFF ,0xFF ,0xFF};
 	broadcast_ip[0] = 0xFF;  
 	broadcast_ip[1] = 0xFF;
 	broadcast_ip[2] = 0xFF;
 	broadcast_ip[3] = 0xFF;
-
 	// 网卡支持单播非自己的包不接收，所以不需要在中断响应函数中做过滤
 	DLPRINTF("[IP]%d:%d:%d:%d\n",my_ip[0],my_ip[1],my_ip[2],my_ip[3]);
 	switch (ntohs(e->type)) {
@@ -514,7 +511,7 @@ int hisf_recv(void *packet, unsigned len)
 			if (memcmp((packet + 38), &my_ip, 4) != 0) {      // 只是接收发给自己IP地址的ARP请求作响应
 				return DISCARD_PACKET;
 			}
-			return packet_deliver(packet,len,&hisf.name,0); 
+			return packet_deliver(packet,len,(char const *const)&hisf.name,0); 
 			break;
 		case ETHERTYPE_IP: // IP support
 			if ((*((char *)e + ETHERTYPE_OFFSET) >> 4) != FILTER_IPV4) {    // IPv4版本的判断，非IPv4的丢掉
@@ -526,27 +523,65 @@ int hisf_recv(void *packet, unsigned len)
 				case ip_proto_icmp:
 				case ip_proto_tcp:
 					if((memcmp(((unsigned char *)packet + 30), my_ip, 4) == 0)){   // 帧的目的IP地址是自己的接收，否则扔掉
-						return packet_deliver(packet,len,&hisf.name,0);
+#if 0
+						printf("\n==========================================\n");
+						int i;
+						char *tp = packet;
+						for (i = 1; i < 65; i++) {
+							printf("%.2x ", *(char *)tp);
+							tp++;
+							if (i % 8 == 0) printf("  ");
+							if (i % 16 == 0 ) printf("\n");
+						}   
+						printf("\n==========================================\n");
+#endif
+						return packet_deliver(packet,len,(char const *const)&hisf.name,0);
 					} else
 						return DISCARD_PACKET;
 					break;
 				case ip_proto_udp:
 					// 现在支持UDP的DHCP和DNS	
 					tmp_udp = (udp_hdr *)ip_jump_next_layer(ip);
+	//					printf("tmp_udp->dst_port = %d\n",ntohs(tmp_udp->dst_port));  // This is for test
+#if 0
+						printf("\n==========================================\n");
+						int i;
+						char *tp = packet;
+						for (i = 1; i < 65; i++) {
+							printf("%.2x ", *(char *)tp);
+							tp++;
+							if (i % 8 == 0) printf("  ");
+							if (i % 16 == 0 ) printf("\n");
+						}   
+						printf("\n==========================================\n");
+#endif
+
+#if 0				// 对于端口不作控制，如果有多个应用的话，可能会有很多自定义的端口，所以在这里无法获取到应用层给定的端口
 					switch (ntohs(tmp_udp->dst_port)) {
 						case udp_port_dns_srv:		// DNS support
 						case udp_port_bootp_clnt:  // DHCP support
-						case udp_port_bootp_srv:   // DHCP support
-							if((memcmp(((unsigned char *)packet + 30), my_ip, 4) == 0)){    // 帧的目的IP是广播地址的接收
-								return packet_deliver(packet,len,&hisf.name,0);
+						//case udp_port_bootp_srv:   // DHCP support
+						case udp_port_tftp_clnt:   // TFTP support
+							if((memcmp(((unsigned char *)packet + 30), my_ip, 4) == 0)){    // 帧的目的IP是自己地址的接收
+								return packet_deliver(packet,len,(char const *const)&hisf.name,0); 
 							}
-							if (memcmp((unsigned char *)packet + 30, broadcast_ip, 4) == 0) {  // 帧的目的IP地址是自己的接收
-								return packet_deliver(packet,len,&hisf.name,0);
+							if (memcmp((unsigned char *)packet + 30, broadcast_ip, 4) == 0) {  // 帧的目的IP地址是广播的接收
+								return packet_deliver(packet,len,(char const *const)&hisf.name,0); 
 							}
 							break;
 						default:
 							break;
 					}
+#endif
+#if 1
+					if((memcmp(((unsigned char *)packet + 30), my_ip, 4) == 0)){    // 帧的目的IP是自己地址的接收
+						return packet_deliver(packet,len,(char const *const)&hisf.name,0); 
+					}
+					if (memcmp((unsigned char *)packet + 30, broadcast_ip, 4) == 0) {  // 帧的目的IP地址是广播的接收
+						return packet_deliver(packet,len,(char const *const)&hisf.name,0); 
+					}
+#endif
+
 					break;
 				default:
 					return DISCARD_PACKET;
@@ -556,5 +591,6 @@ int hisf_recv(void *packet, unsigned len)
 			DLPRINTF("This packet is filtered[TYPE]-----%d \n",e->type);
 			return DISCARD_PACKET;
 	}
+	return 0;
 }
 

@@ -82,6 +82,7 @@
 #include "lwip/dns.h"
 
 #include <string.h>
+#include <unistd.h>	 // added by DuLi
 
 /** DNS server IP address */
 #ifndef DNS_SERVER_ADDRESS

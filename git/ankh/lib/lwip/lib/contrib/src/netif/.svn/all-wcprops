@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/ht/!svn/ver/7660/SLoader/30.Code/l4/pkg/ankh/lib/lwip/lib/contrib/src/netif
+END
+etharp.c
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/ht/!svn/ver/7719/SLoader/30.Code/l4/pkg/ankh/lib/lwip/lib/contrib/src/netif/etharp.c
+END
+slipif.c
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/ht/!svn/ver/7660/SLoader/30.Code/l4/pkg/ankh/lib/lwip/lib/contrib/src/netif/slipif.c
+END
+ethernetif.c
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svn/ht/!svn/ver/7719/SLoader/30.Code/l4/pkg/ankh/lib/lwip/lib/contrib/src/netif/ethernetif.c
+END
+FILES
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/ht/!svn/ver/7660/SLoader/30.Code/l4/pkg/ankh/lib/lwip/lib/contrib/src/netif/FILES
+END

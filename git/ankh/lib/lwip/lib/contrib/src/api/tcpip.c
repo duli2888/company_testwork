@@ -70,6 +70,10 @@ sys_mutex_t lock_tcpip_core;
  *
  * @param arg unused argument
  */
+void pthread_test(void)
+{
+		// added by DuLi, just for encountering error!
+}
 static void
 tcpip_thread(void *arg)
 {
@@ -119,6 +123,15 @@ tcpip_thread(void *arg)
 
     case TCPIP_MSG_CALLBACK:
       LWIP_DEBUGF(TCPIP_DEBUG, ("tcpip_thread: CALLBACK %p\n", (void *)msg));
+#if 0 // added by DuLi [2013.03.28]
+	 //printf("\n");
+	 pthread_t pt;
+	 pthread_create(&pt, NULL, pthread_test, NULL);
+	 pthread_join(pt, NULL);
+	 // int m;
+	 // for(m = 0; m < 10000; m++);
+#endif
+	 
       msg->msg.cb.function(msg->msg.cb.ctx);
       memp_free(MEMP_TCPIP_MSG_API, msg);
       break;
@@ -308,6 +321,7 @@ tcpip_apimsg(struct api_msg *apimsg)
 #endif
   
   if (sys_mbox_valid(&mbox)) {
+  struct tcpip_msg msg;
     msg.type = TCPIP_MSG_API;
     msg.msg.apimsg = apimsg;
     sys_mbox_post(&mbox, &msg);
