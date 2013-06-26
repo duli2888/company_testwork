@@ -1,39 +1,48 @@
+// 共同基类的多继承
 #include <iostream>
 
-class A
+using namespace std;
+
+class R
 {
-	private:
+		int r;
+	public:
+		R(int anInt) { r = anInt;}
+		void print(){ cout << "r = " << r << endl; }
+};
+
+class A : public R
+{
 		int a;
 	public:
-		A(int i):a(i){}
-		virtual void print() {count << a << endl;}
-		int get_a(){return a;}
+		A(int m, int n) : R(n) { a = m; }
 };
 
-class B
+class B : public R
 {
-	private:
 		int b;
 	public:
-		B(int j):b(j){}
-		void print(){count << b << endl;}
-		int get_b(){return b;}
+		B(int m, int n) : R(n) { b = m; }
 };
 
-class C:public A,public B
+class C : public A, public B
 {
 	int c;
 	public:
-	C(int i,int j,int k):A(i),B(j),c(k){}
-	void print()	A{A::print(); B::print();}
-	//use print() with scope resolution
-	void get_ab()	{cout << get_a() << " " << get_b() << endl;}
-	//use get_a() and get_b() without scope resolution
+	C (int m, int n, int w) : A(n, w), B(n, w) { c = m; }
 };
 
-int main()
-{
-	Cx(5,3,10);
-
-
+int main( )
+{    
+	R rr(10);
+	A aa(20, 30);
+	B bb(40, 50);
+	C cc(5, 7, 9);
+	rr.print();
+	aa.print();						//inherits R print  
+	bb.print();						//inherits R print
+	cc.A::print();					// 需要指明是A还是B的print	
+	cc.B::print();					// 需要指明是A还是B的print	
+	//cc.print();					//would give error
+	return 0;
 }
