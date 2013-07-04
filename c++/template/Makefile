@@ -1,0 +1,5 @@
+all: 1st 2nd
+
+1st:
+
+2nd:

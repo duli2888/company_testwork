@@ -1,94 +1,93 @@
-//多级继承
+//多级继承,符号重载
 // Point-Circle-Cylinder
+
 #include <iostream>
 using namespace std;
-// THE POINT CLASS
+
 class Point
 {
-	friend ostream & operator<<(ostream &,Point &);
+	friend ostream & operator << (ostream &, Point &);
+	protected:					// accessed by derived class
+		double x;
+		double y;
 	public:
-
-	//  constructor
-	Point (double xval =0, double yval=0 )
-	{ x=xval; y=yval;};  
-	protected:       // accessed by derived class
-	double  x;
-	double  y;
+		Point (double xval = 0, double yval = 0 ) { x = xval; y = yval; };  
 };
-ostream & operator << (ostream & os,
-		Point &  apoint)
+
+ostream & operator << (ostream & os, Point & apoint)
 {
-	cout <<" Point:X:Y: "<<apoint.x << "," 
-		<< apoint.y<< "/n";
-	return os;  
+	cout << "Point:X:Y: " << apoint.x << "," << apoint.y << endl;
+	return os;
 }
-//The Circle class  inherits from class Point
+
 class Circle : public Point
 {
-	friend ostream & operator<<(ostream &,Circle&);
+	friend ostream & operator << (ostream &, Circle &);
 	public:
-	Circle (double r=0,double xval=0,double yval=0) 
-		:Point(xval,yval), radius(r)
-	{ 
-		//radius = r;
-	}
-	double area()
-	{ 
-		return (3.14159* radius *radius);
-	}
+		Circle (double r = 0, double xval = 0, double yval = 0) : Point(xval, yval), radius(r)
+		{ 
+			//radius  =  r;
+		}
+		double area()
+		{ 
+			return (3.14159 * radius * radius);
+		}
 	protected:
-	double radius;
+		double radius;
 };
 
 //note casting circle to point
-ostream & operator <<(ostream & os, Circle & aCircle)
+ostream & operator << (ostream & os, Circle & aCircle)
 {
-	cout<< "Circle:radius:" << aCircle.radius;
-	os<< aCircle.x << "/n"; 
-	os<< aCircle.y << "/n";        
-	return os;      
+	cout << "Circle:radius: " << aCircle.radius << endl;;
+	os << aCircle.x << endl;	// 在这里，cout << aCircle.x << endl; 效果相同
+	os << aCircle.y << endl;	// 在这里，cout << aCircle.y << endl; 效果相同
+	
+	return os;
 }
+
 // THE CYLINDER CLASS
-class  Cylinder  : public Circle
+class Cylinder : public Circle
 {
 	friend ostream & operator << (ostream & ,Cylinder &);
 	public:
-	Cylinder (double hv=0,double rv=0, 
-			double xv=0,double yv=0 )
-		: Circle( xv,yv,rv)
+	Cylinder (double hv = 0, double rv = 0, double xv = 0,double yv = 0 ) : Circle(xv, yv, rv)
 	{
 		height = hv;
 	}        
-	double  area ( );
-	protected:     // may have derived classes
+	double area();
+	protected:			// may have derived classes
 	double  height;
 };
-double Cylinder :: area ( )
-{ // Note that cylinder area uses Circle area
-	return  2.0* Circle::area() + 2.0*3.14159* radius*height;
+
+double Cylinder :: area () // Note that cylinder area uses Circle area
+{
+	return  2.0 * Circle::area() + 2.0 * 3.14159 * radius * height;
 }
-ostream & operator << (ostream & os,
-		Cylinder & acylinder)
-{ 
-	cout << "cylinder dimensions: ";
-	cout << "x: " <<acylinder.x;
-	cout << "  y: " <<acylinder.y ;
-	cout << "  radius: " <<acylinder.radius ;
-	cout << "  height: " <<acylinder.height 
-		<< endl;
-	return os; 
+
+ostream & operator << (ostream & os, Cylinder & acylinder)
+{
+	cout << "Cylinder dimensions:";
+	cout << "  x: " << acylinder.x;
+	cout << "  y: " << acylinder.y;
+	cout << "  radius: " << acylinder.radius;
+	cout << "  height: " << acylinder.height << endl;
+	return os;
 }
+
 int main(void)
 {
-	Point p(2,3);
-	Circle c(7,6,5);
-	Cylinder cyl(10,11,12,13);
+	Point p(1, 2);
+	Circle c(3, 4, 5);
+	Cylinder cyl(10, 11, 12, 13);
 	cout << p;
+	cout << "------------------------------" << endl;
 	cout << c;
-	cout << "area of cirle:" << c.area() << endl;
-	cout<< cyl;
-	cout<<"area of cylinder:"<< cyl.area()<<endl ;
-	cout<<"area of cylinder base is "  
-		<< cyl.Circle::area() << endl;
+	cout << "------------------------------" << endl;
+	cout << "Area of cirle:" << c.area() << endl;
+	cout << "------------------------------" << endl;
+	cout << cyl;
+	cout << "Area of cylinder:" << cyl.area() << endl;
+	cout << "Area of cylinder base is " << cyl.Circle::area() << endl;
 	return 0;
 }
